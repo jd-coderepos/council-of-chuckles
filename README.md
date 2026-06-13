@@ -54,6 +54,10 @@ The app is a tiny AI council chamber: part multilingual companion, part small-mo
 
 Council of Chuckles is not just a prompt wrapper. A lightweight programmed Council Engine runs before generation. It detects the user's themes, emotions, and needs; matches advisors using profile metadata; balances archetypes; plans dialogue turns; and only then asks the small language model to perform the scene. This keeps the app playful, explainable, and reliable even when fallback mode is active.
 
+## Built With Codex
+
+This submission was developed with help from OpenAI Codex. The connected Git history includes Codex-attributed commits for the application, ZeroGPU preparation, and submission preflight tooling.
+
 ## The Council Engine
 
 Pipeline:

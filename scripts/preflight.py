@@ -16,6 +16,7 @@ REQUIRED_FILES = [
     "utils/audio.py",
 ]
 REQUIRED_TAGS = {"build-small", "thousand-token-wood", "gradio", "zerogpu"}
+SUBMISSION_LINK_LABELS = ["Live Space", "GitHub repo", "Demo video", "Social post"]
 
 
 def ok(message: str) -> None:
@@ -25,6 +26,10 @@ def ok(message: str) -> None:
 def fail(message: str) -> None:
     print(f"[FAIL] {message}")
     raise SystemExit(1)
+
+
+def warn(message: str) -> None:
+    print(f"[WARN] {message}")
 
 
 def read(path: str) -> str:
@@ -99,11 +104,26 @@ def check_app_fallback() -> None:
     ok("app imports and fallback council generation works")
 
 
+def check_submission_placeholders() -> None:
+    readme = read("README.md")
+    for label in SUBMISSION_LINK_LABELS:
+        match = re.search(rf"^- {re.escape(label)}:\s*(.+)$", readme, flags=re.MULTILINE)
+        if not match:
+            warn(f"README.md does not list submission link: {label}")
+            continue
+        value = match.group(1).strip().lower()
+        if "add the" in value or "after " in value:
+            warn(f"README.md still has placeholder for {label}")
+    if "Best Use of Codex" not in readme and "Codex" not in readme:
+        warn("README.md does not mention Codex; add it if targeting Best Use of Codex")
+
+
 def main() -> None:
     check_required_files()
     check_readme_front_matter()
     check_zerogpu_hooks()
     check_app_fallback()
+    check_submission_placeholders()
     print("[OK] submission preflight passed")
 
 

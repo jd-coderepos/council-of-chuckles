@@ -146,3 +146,18 @@ Before submitting, make sure `README.md` has:
 - short explanation of ZeroGPU and fallback behavior
 
 Also fix the YAML emoji line if it still appears corrupted in the GitHub/Hugging Face preview.
+
+## 10. Build Small Requirement Map
+
+Use this as the final audit before you submit:
+
+| Rule | Evidence in this project | Still to do |
+| --- | --- | --- |
+| REQ-01: stay under 32B | `README.md` lists Tiny Aya Water 3.35B, Cohere Transcribe 2B, VoxCPM2 2B, and MiniCPM5-1B ~1.08B | Confirm live Space uses these model IDs |
+| REQ-02: ship a Gradio app | `app.py`, `requirements.txt`, and README front matter use Gradio | Deploy inside the official Build Small Hugging Face org |
+| REQ-03: record a demo | Demo script is in `README.md` | Record and link the final video |
+| REQ-04: post it | `README.md` has a Social post placeholder | Publish the social post and replace the placeholder |
+| REQ-05: mind the ZeroGPU limit | This is one ZeroGPU-targeted app | Keep your total ZeroGPU submissions at 10 or fewer |
+| REQ-06: tag your README | YAML tags include `build-small`, `thousand-token-wood`, `gradio`, and `zerogpu` | Add/remove badge tags only if you intentionally target them |
+
+For the OpenAI sponsor prize, keep the GitHub repo or Space connected to commits authored by `OpenAI Codex <codex@openai.com>`.
