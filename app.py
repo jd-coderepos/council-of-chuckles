@@ -349,7 +349,13 @@ with gr.Blocks(css=CSS, title="Council of Chuckles") as demo:
                     )
                     turns = gr.Slider(4, 12, value=6, step=1, label="Dialogue turns")
                 with gr.Row():
-                    humor = gr.Slider(0, 5, value=3, step=1, label="Humor intensity")
+                    humor = gr.Slider(
+                        0,
+                        5,
+                        value=3,
+                        step=1,
+                        label="Comedy level: subtle wit → hilarious kindness",
+                    )
                     compassion = gr.Slider(0, 5, value=5, step=1, label="Compassion level")
                 with gr.Row():
                     include_verdict = gr.Checkbox(value=True, label="Include final verdict")

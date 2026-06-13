@@ -11,6 +11,45 @@ SYSTEM_INSTRUCTION = (
     "dismissive of crisis. Answer in the requested output language."
 )
 
+def humor_brief(humor_intensity: int, compassion_level: int) -> str:
+    """Return safe humor instructions tuned by the UI sliders.
+
+    The scale is subtle humor -> hilarious humor, not serious -> funny.
+    """
+    humor_intensity = int(humor_intensity or 0)
+    compassion_level = int(compassion_level or 3)
+
+    safety = (
+        "The humor must target the situation, the stress pattern, the overthinking, "
+        "or the absurdity of the moment. Do not mock the user, colleagues, identities, "
+        "appearance, intelligence, culture, gender, race, disability, age, religion, or vulnerability. "
+        "No cruelty, no humiliation, no punching down."
+    )
+
+    if humor_intensity <= 1:
+        humor = (
+            "Use subtle wit throughout: dry observations, gentle irony, and one small playful image. "
+            "The tone should feel quietly funny, not serious."
+        )
+    elif humor_intensity <= 3:
+        humor = (
+            "Use clear playful humor in most lines: witty reframes, light absurd metaphors, "
+            "and comic images drawn from the user's words. Keep the advice practical."
+        )
+    else:
+        humor = (
+            "Use high comic energy: harmless exaggeration, absurd metaphors, mock-epic language, "
+            "and vivid silly images from the user's situation. Aim for funny, but never mean."
+        )
+
+    compassion = (
+        "Keep the user emotionally safe: the joke should make the problem feel smaller, "
+        "not make the person feel small."
+        if compassion_level >= 3
+        else "Keep the humor non-cruel and focused on the situation."
+    )
+
+    return f"{humor}\n{safety}\n{compassion}"
 
 def advisor_prompt(
     topic: str,
@@ -119,6 +158,9 @@ def campfire_prompt(
         f"{turn['index']}. {turn['speaker']}: {turn['function']} ({turn['trigger_reason']})"
         for turn in dialogue_plan.get("turn_order", [])
     )
+
+    humor_guidance = humor_brief(humor_intensity, compassion_level)
+
     return f"""SYSTEM:
 {SYSTEM_INSTRUCTION}
 
@@ -126,6 +168,7 @@ User topic: {topic}
 Output language: {output_language}
 Humor intensity: {humor_intensity}/5
 Compassion: {compassion_level}/5
+Humor guidance: {humor_guidance}
 Scene mood: {dialogue_plan.get('council_mood')}
 Analysis: themes={analysis.get('themes')}; emotions={analysis.get('emotions')}; needs={analysis.get('needs')}
 
@@ -140,9 +183,13 @@ Do not use Markdown, bullets, bold text, or section headings.
 Each dialogue line must be on one line only, in this exact format:
 Advisor Name: one concise sentence
 Each line must directly address the user's topic.
-Each line must be concise: maximum 25 words.
+Each line must include useful advice and at least a subtle comic twist.
+At low comedy levels, use dry wit or gentle irony.
+At high comedy levels, use absurd but kind metaphors and playful exaggeration.
+Keep humor aimed at the situation, not at insulting the user or other people.
+Each line must be concise: maximum 28 words.
 After the dialogue lines, write exactly one final line:
 The Gavel Falls.
-Stop immediately after that line. Do not write "The end", do not invite follow-up, and do not repeat the verdict.
+Stop immediately after that line.
 """
 
