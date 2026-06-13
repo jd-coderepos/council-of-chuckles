@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -118,12 +119,44 @@ def check_submission_placeholders() -> None:
         warn("README.md does not mention Codex; add it if targeting Best Use of Codex")
 
 
+def check_git_remotes() -> None:
+    try:
+        result = subprocess.run(
+            ["git", "-c", f"safe.directory={ROOT.as_posix()}", "remote", "-v"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except Exception as exc:
+        stderr = getattr(exc, "stderr", "") or ""
+        detail = f": {stderr.strip()}" if stderr.strip() else ""
+        warn(f"Could not inspect git remotes: {exc.__class__.__name__}{detail}")
+        return
+
+    remotes = result.stdout
+    if "origin" not in remotes:
+        warn("GitHub remote `origin` is not configured yet")
+    elif "github.com" not in remotes:
+        warn("Remote `origin` exists but does not look like GitHub")
+    else:
+        ok("GitHub remote is configured")
+
+    if "space" not in remotes and "huggingface.co/spaces" not in remotes:
+        warn("Hugging Face Space remote is not configured yet")
+    elif "huggingface.co/spaces" not in remotes:
+        warn("Space remote exists but does not look like a Hugging Face Space URL")
+    else:
+        ok("Hugging Face Space remote is configured")
+
+
 def main() -> None:
     check_required_files()
     check_readme_front_matter()
     check_zerogpu_hooks()
     check_app_fallback()
     check_submission_placeholders()
+    check_git_remotes()
     print("[OK] submission preflight passed")
 
 
