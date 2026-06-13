@@ -42,6 +42,8 @@ def make_final_verdict(
     use_model: bool,
     status_bits: list[str],
     council_discussion: str = "",
+    humor_intensity: int = 3,
+    compassion_level: int = 3,
 ) -> str:
     """Generate the final verdict from the actual council discussion."""
     if not include_verdict:
@@ -54,6 +56,8 @@ def make_final_verdict(
             active_speakers=active_speakers,
             output_language=output_language,
             council_discussion=council_discussion,
+            humor_intensity=humor_intensity,
+            compassion_level=compassion_level,
         )
         generated, model_status = generate_text(
             prompt,
@@ -187,6 +191,8 @@ def run_council(
             use_model,
             status_bits,
             council_discussion=plain_output,
+            humor_intensity=humor_intensity,
+            compassion_level=compassion_level,
         )
         return {
             "engine_html": engine_html,
@@ -221,6 +227,8 @@ def run_council(
             use_model,
             status_bits,
             council_discussion=council_discussion,
+            humor_intensity=humor_intensity,
+            compassion_level=compassion_level,
         )
         return {
             "engine_html": engine_html,
@@ -261,6 +269,8 @@ def run_council(
         use_model,
         status_bits,
         council_discussion=plain,
+        humor_intensity=humor_intensity,
+        compassion_level=compassion_level,
     )
     return {
         "engine_html": engine_html,

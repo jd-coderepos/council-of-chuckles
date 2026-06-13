@@ -183,13 +183,13 @@ Do not use Markdown, bullets, bold text, or section headings.
 Each dialogue line must be on one line only, in this exact format:
 Advisor Name: one concise sentence
 Each line must directly address the user's topic.
-Each line must include useful advice and at least a subtle comic twist.
+Each line must include a useful reframe or tiny action, phrased through a comic lens.
 Use the user's own words as comic material when safe, such as "bananas", "purple buttons", or "deadline gremlin".
 At low comedy levels, use dry wit or gentle irony.
 At high comedy levels, use absurd but kind metaphors and playful exaggeration.
 Keep humor aimed at the situation, not at insulting the user or other people.
 Each line must be short: maximum 18 words.
-Do not explain the metaphor. Do not write long inspirational paragraphs.
+Do not explain the metaphor. Do not write inspirational paragraphs, therapy-speak, or motivational-poster lines.
 Do not write "The Gavel Falls"; the app generates the final verdict separately.
 Output only the advisor dialogue lines.
 """
