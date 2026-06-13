@@ -72,6 +72,62 @@ def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
 
     return text.strip()
 
+def clean_verdict_generation(text: str) -> str:
+    """Clean Tiny Aya verdict output without treating it like advisor dialogue."""
+    text = (text or "").strip()
+    text = text.replace("```", "").strip()
+    text = text.strip("-").strip()
+
+    if "The Gavel Falls:" in text:
+        text = text[text.find("The Gavel Falls:") :].strip()
+    elif "The Gavel Falls" in text:
+        text = text[text.find("The Gavel Falls") :].strip()
+    else:
+        text = "The Gavel Falls:\n" + text
+
+    allowed_labels = [
+        "The Gavel Falls:",
+        "What the council agrees on:",
+        "What they disagree on:",
+        "Hidden pattern:",
+        "Tiny next action:",
+        "Ridiculous but useful reminder:",
+    ]
+
+    cleaned_lines = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+
+        if line.startswith("The Gavel Falls:"):
+            cleaned_lines.append("The Gavel Falls:")
+            trailing = line.replace("The Gavel Falls:", "", 1).strip()
+
+            # If Aya put content on the header line, move it into the first verdict item.
+            if trailing and not trailing.startswith("What the council agrees on:"):
+                line = f"What the council agrees on: {trailing}"
+            else:
+                continue
+
+        if any(line.startswith(label) for label in allowed_labels[1:]):
+            words = line.split()
+
+            # Prevent long rambling verdict lines.
+            if len(words) > 30:
+                line = " ".join(words[:30]).rstrip(",;:") + "."
+
+            if line[-1] not in ".!?":
+                line = line.rstrip(",;:") + "."
+
+            cleaned_lines.append(line)
+
+        if len(cleaned_lines) >= 6:
+            break
+
+    return "\n".join(cleaned_lines).strip()
+
 @lru_cache(maxsize=2)
 def load_text_model(model_id: str = TEXT_MODEL_ID):
     """Load the text model lazily. Imports stay inside the function for Spaces reliability."""
@@ -115,6 +171,8 @@ def generate_text(
         text = decoded[len(prompt) :].strip() if decoded.startswith(prompt) else decoded.strip()
         if clean_mode == "dialogue":
             text = clean_generation(text)
+        elif clean_mode == "verdict":
+            text = clean_verdict_generation(text)
         else:
             text = text.strip()
 

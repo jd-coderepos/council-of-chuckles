@@ -27,22 +27,25 @@ Detected needs: {', '.join(analysis.get('needs', []))}
 Advisors: {speaker_names}
 
 Rules:
-- Base the verdict on the actual council discussion above.
+- Base the verdict on the council discussion, but do not copy any council line verbatim.
+- Synthesize the advice into fresh wording.
 - Use concrete details from the user's question.
+- Do not continue the council dialogue.
+- Do not write advisor names.
 - Do not use generic therapy language.
 - Do not say "not a verdict on your worth".
 - Do not mention academic anxiety unless the user question is clearly academic.
-- Keep the full verdict under 90 words.
-- Make it practical, witty, and specific.
-- Do not repeat the council dialogue.
+- Keep each verdict item to one short sentence.
+- Do not write anything after the final "Ridiculous but useful reminder" line.
+- Output only the structure below.
 
 Use this exact structure:
 The Gavel Falls:
-What the council agrees on:
-What they disagree on:
-Hidden pattern:
-Tiny next action:
-Ridiculous but useful reminder:
+What the council agrees on: <one short sentence>
+What they disagree on: <one short sentence>
+Hidden pattern: <one short sentence>
+Tiny next action: <one concrete action>
+Ridiculous but useful reminder: <one witty sentence>
 """
 
 

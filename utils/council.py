@@ -31,7 +31,7 @@ MAX_TOKENS = {
     "Campfire Council Mode": 260,
 }
 
-VERDICT_TOKENS = 160
+VERDICT_TOKENS = 240
 
 def make_final_verdict(
     topic: str,
@@ -58,7 +58,7 @@ def make_final_verdict(
         generated, model_status = generate_text(
             prompt,
             max_new_tokens=VERDICT_TOKENS,
-            temperature=0.45,
+            temperature=0.35,
             clean_mode="verdict",
         )
         status_bits.append(f"Verdict: {model_status}")
