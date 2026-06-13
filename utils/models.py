@@ -25,19 +25,22 @@ TEXT_MODEL_ID = os.getenv("TEXT_MODEL_ID", "CohereLabs/tiny-aya-water")
 ENABLE_ENGLISH_FALLBACK_MODEL = os.getenv("ENABLE_ENGLISH_FALLBACK_MODEL", "false").lower() == "true"
 ENGLISH_FALLBACK_MODEL_ID = os.getenv("ENGLISH_FALLBACK_MODEL_ID", "openbmb/MiniCPM5-1B")
 
-
 def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
-    """Trim small-model over-generation, repeated endings, and runaway dialogue."""
-    text = (text or "").strip()
+    """Trim small-model over-generation and recover advisor dialogue lines.
 
-    # Remove markdown fences or separators that small models often add.
+    Handles both:
+    - Socrates: advice here
+    - **Socrates:** 
+      advice here
+    """
+    text = (text or "").strip()
     text = text.replace("```", "").strip()
     text = text.strip("-").strip()
 
-    marker = "The Gavel Falls."
-    if marker in text:
-        before, _, _after = text.partition(marker)
-        text = before.strip()
+    # Stop before any verdict or repeated ending.
+    for marker in ["The Gavel Falls.", "The Gavel Falls:"]:
+        if marker in text:
+            text = text.partition(marker)[0].strip()
 
     banned_starts = [
         "The end.",
@@ -49,27 +52,62 @@ def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
     ]
 
     cleaned_lines = []
-    dialogue_lines = 0
+    pending_speaker = None
 
-    for line in text.splitlines():
-        stripped = line.strip()
-        if not stripped:
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
             continue
 
-        if any(stripped.startswith(prefix) for prefix in banned_starts):
+        # Remove simple markdown emphasis/bullets.
+        line = line.lstrip("-•0123456789. ").strip()
+        line = line.replace("**", "").replace("__", "").strip()
+
+        if not line:
+            continue
+
+        if any(line.startswith(prefix) for prefix in banned_starts):
             break
 
-        # Keep advisor-like lines only, e.g. "Socrates: ..."
-        if ":" in stripped:
-            cleaned_lines.append(stripped)
-            dialogue_lines += 1
+        if ":" in line:
+            speaker, body = line.split(":", 1)
+            speaker = speaker.strip()
+            body = body.strip()
 
-        if dialogue_lines >= max_dialogue_lines:
+            # Ignore malformed labels.
+            if not speaker or len(speaker) > 40:
+                continue
+
+            # Case: "Socrates:" with no body yet. Store speaker and use next line.
+            if not body:
+                pending_speaker = speaker
+                continue
+
+            cleaned_lines.append(f"{speaker}: {body}")
+            pending_speaker = None
+
+        elif pending_speaker:
+            # Case: previous line was "Socrates:" and this line is the advice.
+            cleaned_lines.append(f"{pending_speaker}: {line}")
+            pending_speaker = None
+
+        elif cleaned_lines:
+            # Continuation of the previous advisor line.
+            cleaned_lines[-1] = cleaned_lines[-1].rstrip() + " " + line
+
+        if len(cleaned_lines) >= max_dialogue_lines:
             break
+
+    # Remove any accidental empty speaker-only lines.
+    cleaned_lines = [
+        line for line in cleaned_lines
+        if ":" in line and line.split(":", 1)[1].strip()
+    ]
 
     if cleaned_lines:
         return "\n".join(cleaned_lines).strip()
 
+    # If cleaning failed, return the raw text rather than empty advisor names.
     return text.strip()
 
 def clean_verdict_generation(text: str) -> str:

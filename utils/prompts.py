@@ -136,7 +136,9 @@ Dialogue plan:
 {turns}
 
 Write exactly {len(dialogue_plan.get("turn_order", []))} dialogue lines, following the dialogue plan.
-Each line must start with the advisor name followed by a colon.
+Do not use Markdown, bullets, bold text, or section headings.
+Each dialogue line must be on one line only, in this exact format:
+Advisor Name: one concise sentence
 Each line must directly address the user's topic.
 Each line must be concise: maximum 25 words.
 After the dialogue lines, write exactly one final line:
