@@ -6,7 +6,7 @@ colorTo: yellow
 sdk: gradio
 python_version: 3.10.13
 app_file: app.py
-short_description: A whimsical small-model council that turns serious questions into practical, compassionate advice.
+short_description: Tiny AI advisors with jokes.
 fullWidth: true
 pinned: false
 models:
