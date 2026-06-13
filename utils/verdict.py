@@ -8,15 +8,33 @@ def build_verdict_prompt_or_template(
     analysis: dict,
     active_speakers: list[dict],
     output_language: str,
+    council_discussion: str = "",
     include_comic: bool = True,
 ) -> str:
     speaker_names = ", ".join(advisor["name"] for advisor in active_speakers)
-    return f"""Write a compact final verdict in {output_language}.
-Topic: {topic}
+
+    return f"""Write a compact final verdict in {output_language} based on the user's question and the council discussion.
+
+User question:
+{topic}
+
+Council discussion:
+{council_discussion}
+
 Detected themes: {', '.join(analysis.get('themes', []))}
 Detected emotions: {', '.join(analysis.get('emotions', []))}
 Detected needs: {', '.join(analysis.get('needs', []))}
 Advisors: {speaker_names}
+
+Rules:
+- Base the verdict on the actual council discussion above.
+- Use concrete details from the user's question.
+- Do not use generic therapy language.
+- Do not say "not a verdict on your worth".
+- Do not mention academic anxiety unless the user question is clearly academic.
+- Keep the full verdict under 90 words.
+- Make it practical, witty, and specific.
+- Do not repeat the council dialogue.
 
 Use this exact structure:
 The Gavel Falls:

@@ -196,4 +196,3 @@ def run_council(
         "analysis": analysis,
         "active_speakers": active_speakers,
     }
-

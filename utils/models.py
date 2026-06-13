@@ -90,7 +90,12 @@ def load_text_model(model_id: str = TEXT_MODEL_ID):
 
 
 @spaces.GPU(duration=120)
-def generate_text(prompt: str, max_new_tokens: int = 280, temperature: float = 0.7) -> tuple[str, str]:
+def generate_text(
+    prompt: str,
+    max_new_tokens: int = 280,
+    temperature: float = 0.7,
+    clean_mode: str = "dialogue",
+) -> tuple[str, str]:
     """Generate text or return a fallback status on failure."""
     try:
         tokenizer, model = load_text_model(TEXT_MODEL_ID)
@@ -108,7 +113,13 @@ def generate_text(prompt: str, max_new_tokens: int = 280, temperature: float = 0
         )
         decoded = tokenizer.decode(output[0], skip_special_tokens=True)
         text = decoded[len(prompt) :].strip() if decoded.startswith(prompt) else decoded.strip()
-        return clean_generation(text), f"Model mode: Tiny Aya ({TEXT_MODEL_ID})"
+        if clean_mode == "dialogue":
+            text = clean_generation(text)
+        else:
+            text = text.strip()
+
+        return text, f"Model mode: Tiny Aya ({TEXT_MODEL_ID})"
+
     except Exception as exc:
         if ENABLE_ENGLISH_FALLBACK_MODEL:
             try:
