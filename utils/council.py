@@ -24,10 +24,10 @@ from .safety import (
 
 
 MAX_TOKENS = {
-    "Mastermind Mode": 280,
-    "Comic Relief Mode": 280,
-    "Council Mode": 700,
-    "Campfire Council Mode": 900,
+    "Mastermind Mode": 180,
+    "Comic Relief Mode": 180,
+    "Council Mode": 360,
+    "Campfire Council Mode": 420,
 }
 
 

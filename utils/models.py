@@ -26,6 +26,32 @@ ENABLE_ENGLISH_FALLBACK_MODEL = os.getenv("ENABLE_ENGLISH_FALLBACK_MODEL", "fals
 ENGLISH_FALLBACK_MODEL_ID = os.getenv("ENGLISH_FALLBACK_MODEL_ID", "openbmb/MiniCPM5-1B")
 
 
+def clean_generation(text: str) -> str:
+    """Trim small-model over-generation and repeated endings."""
+    text = (text or "").strip()
+
+    marker = "The Gavel Falls."
+    if marker in text:
+        before, _, _after = text.partition(marker)
+        text = before.strip() + "\n\n" + marker
+
+    banned_starts = [
+        "The end.",
+        "Let me know",
+        "If you'd like",
+        "If you would like",
+        "Would you like",
+    ]
+
+    cleaned_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if any(stripped.startswith(prefix) for prefix in banned_starts):
+            break
+        cleaned_lines.append(line)
+
+    return "\n".join(cleaned_lines).strip()
+
 @lru_cache(maxsize=2)
 def load_text_model(model_id: str = TEXT_MODEL_ID):
     """Load the text model lazily. Imports stay inside the function for Spaces reliability."""
@@ -62,7 +88,7 @@ def generate_text(prompt: str, max_new_tokens: int = 280, temperature: float = 0
         )
         decoded = tokenizer.decode(output[0], skip_special_tokens=True)
         text = decoded[len(prompt) :].strip() if decoded.startswith(prompt) else decoded.strip()
-        return text, f"Model mode: Tiny Aya ({TEXT_MODEL_ID})"
+        return clean_generation(text), f"Model mode: Tiny Aya ({TEXT_MODEL_ID})"
     except Exception as exc:
         if ENABLE_ENGLISH_FALLBACK_MODEL:
             try:
@@ -72,7 +98,7 @@ def generate_text(prompt: str, max_new_tokens: int = 280, temperature: float = 0
                     inputs = {key: value.to(model.device) for key, value in inputs.items()}
                 output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=True, temperature=temperature)
                 decoded = tokenizer.decode(output[0], skip_special_tokens=True)
-                return decoded.strip(), f"Model mode: English fallback ({ENGLISH_FALLBACK_MODEL_ID})"
+                return clean_generation(decoded.strip()), f"Model mode: English fallback ({ENGLISH_FALLBACK_MODEL_ID})"
             except Exception:
                 pass
         return "", f"Fallback mode active: {exc.__class__.__name__}"

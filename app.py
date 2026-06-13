@@ -354,7 +354,7 @@ with gr.Blocks(css=CSS, title="Council of Chuckles") as demo:
                 with gr.Row():
                     include_verdict = gr.Checkbox(value=True, label="Include final verdict")
                     demo_friendly = gr.Checkbox(value=True, label="Demo-friendly mode")
-                    use_model = gr.Checkbox(value=False, label="Use local model when available")
+                    use_model = gr.Checkbox(value=True, label="Use Tiny Aya model")
                 with gr.Accordion("Advanced speech options", open=False):
                     speak_final = gr.Checkbox(value=False, label="Speak final verdict")
                     speak_cards = gr.Checkbox(value=False, label="Speak every advisor card")

@@ -135,7 +135,12 @@ Active speakers:
 Dialogue plan:
 {turns}
 
-Write a short scripted dialogue. Each line must be a playful interpretation, not a real quote.
-Use concise lines. End with "The Gavel Falls."
+Write exactly {len(dialogue_plan.get("turn_order", []))} dialogue lines, following the dialogue plan.
+Each line must start with the advisor name followed by a colon.
+Each line must directly address the user's topic.
+Each line must be concise: maximum 25 words.
+After the dialogue lines, write exactly one final line:
+The Gavel Falls.
+Stop immediately after that line. Do not write "The end", do not invite follow-up, and do not repeat the verdict.
 """
 
