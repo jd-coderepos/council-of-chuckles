@@ -1,0 +1,11 @@
+gradio>=5,<7
+spaces
+transformers>=5.4,<6
+huggingface_hub>=0.26,<1
+torch==2.10.0
+accelerate
+sentencepiece
+soundfile
+librosa
+numpy
+protobuf
