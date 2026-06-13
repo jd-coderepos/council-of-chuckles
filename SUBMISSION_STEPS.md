@@ -2,6 +2,16 @@
 
 Follow these steps in order. The app has already been locally smoke-tested in fallback mode.
 
+## 0. Run The Preflight Check
+
+Before every push or Space update, run:
+
+```powershell
+python scripts/preflight.py
+```
+
+It checks required files, README metadata, Build Small tags, ZeroGPU hooks, and fallback generation.
+
 ## 1. Commit The Local Repo
 
 Open PowerShell:
