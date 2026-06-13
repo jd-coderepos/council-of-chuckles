@@ -64,6 +64,42 @@ Use:
 
 Push the same files to the Space repo. If you connected GitHub sync, use that; otherwise clone the Space repo and copy/push the files.
 
+### Two Ways To Get Files Into The Space
+
+Use whichever path Hugging Face offers you.
+
+Path A: GitHub sync
+
+1. Connect the GitHub repo to the Space from the Space settings.
+2. Make sure the synced branch is `main`.
+3. Wait for the Space build logs to start.
+
+Path B: direct Space git push
+
+After creating the Space, Hugging Face will show a git URL like:
+
+```text
+https://huggingface.co/spaces/ORG_OR_USERNAME/council-of-chuckles
+```
+
+Add it as a second remote:
+
+```powershell
+git remote add space https://huggingface.co/spaces/ORG_OR_USERNAME/council-of-chuckles
+git push space main
+```
+
+If Hugging Face asks for credentials, use your Hugging Face username and an access token as the password.
+
+If the Space was initialized with files already, use:
+
+```powershell
+git pull space main --allow-unrelated-histories
+git push space main
+```
+
+If Git opens an editor during the pull, save and close it to accept the merge commit.
+
 ## 5. Set Space Secrets And Variables
 
 In the Space settings, add this secret if model downloads fail:
@@ -103,6 +139,20 @@ Then test model mode:
 4. If it falls back, check the Space logs for model access, dependency, or memory errors.
 
 Then test voice input.
+
+### Reading Space Logs
+
+Open the Space, then go to `Logs`.
+
+Common first-build issues:
+
+- Model access error: accept the Cohere model terms and add `HF_TOKEN`.
+- Package install error: check `requirements.txt`.
+- GPU queue delay: wait and try a shorter prompt.
+- Out-of-memory or timeout: keep TTS off and use text mode first.
+- App loads but model falls back: the demo is still usable, but check logs before final judging.
+
+The fallback path is intentional. It proves the interface and Council Engine even when model quota or access is temporarily unavailable.
 
 ## 7. Record The Demo
 
