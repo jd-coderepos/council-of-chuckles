@@ -7,6 +7,7 @@ from .fallback import advisor_card_text, campfire_lines, trigger_reasons, verdic
 from .matching import select_active_speakers
 from .prompts import advisor_prompt, campfire_prompt, council_prompt
 from .models import generate_text
+from .verdict import build_verdict_prompt_or_template
 from .rendering import (
     render_active_speaker_row,
     render_advisor_response,
@@ -30,6 +31,47 @@ MAX_TOKENS = {
     "Campfire Council Mode": 260,
 }
 
+VERDICT_TOKENS = 160
+
+def make_final_verdict(
+    topic: str,
+    analysis: dict,
+    active_speakers: list[dict],
+    output_language: str,
+    include_verdict: bool,
+    use_model: bool,
+    status_bits: list[str],
+    council_discussion: str = "",
+) -> str:
+    """Generate the final verdict from the actual council discussion."""
+    if not include_verdict:
+        return ""
+
+    if use_model:
+        prompt = build_verdict_prompt_or_template(
+            topic=topic,
+            analysis=analysis,
+            active_speakers=active_speakers,
+            output_language=output_language,
+            council_discussion=council_discussion,
+        )
+        generated, model_status = generate_text(
+            prompt,
+            max_new_tokens=VERDICT_TOKENS,
+            temperature=0.45,
+            clean_mode="verdict",
+        )
+        status_bits.append(f"Verdict: {model_status}")
+
+        if generated:
+            generated = generated.strip()
+            if "The Gavel Falls:" in generated:
+                generated = generated[generated.find("The Gavel Falls:") :].strip()
+            elif not generated.startswith("The Gavel Falls"):
+                generated = "The Gavel Falls:\n" + generated
+            return generated
+
+    return verdict_text(topic, analysis, active_speakers, output_language)
 
 def run_council(
     topic: str,
@@ -130,7 +172,16 @@ def run_council(
             plain_output = "\n".join(f"{advisor['name']}: {line}" for advisor, line, _, _ in fallback_turns)
             if not status_bits:
                 status_bits.append("Fallback mode active")
-        verdict = verdict_text(topic, analysis, active_speakers, output_language) if include_verdict else ""
+        verdict = make_final_verdict(
+            topic,
+            analysis,
+            active_speakers,
+            output_language,
+            include_verdict,
+            use_model,
+            status_bits,
+            council_discussion=plain_output,
+        )
         return {
             "engine_html": engine_html,
             "active_html": active_html,
@@ -154,7 +205,17 @@ def run_council(
             body = generated or advisor_card_text(advisor, topic, analysis, mode, output_language)
             cards.append(render_advisor_response(advisor, body, reasons[advisor["id"]]))
             plain_parts.append(f"{advisor['name']}\n{body}")
-        verdict = verdict_text(topic, analysis, active_speakers, output_language) if include_verdict else ""
+        council_discussion = "\n\n".join(plain_parts)
+        verdict = make_final_verdict(
+            topic,
+            analysis,
+            active_speakers,
+            output_language,
+            include_verdict,
+            use_model,
+            status_bits,
+            council_discussion=council_discussion,
+        )
         return {
             "engine_html": engine_html,
             "active_html": active_html,
@@ -185,7 +246,16 @@ def run_council(
             for advisor in active_speakers
         )
         status_bits.append("Fallback mode active")
-    verdict = verdict_text(topic, analysis, active_speakers, output_language) if include_verdict else ""
+    verdict = make_final_verdict(
+        topic,
+        analysis,
+        active_speakers,
+        output_language,
+        include_verdict,
+        use_model,
+        status_bits,
+        council_discussion=plain,
+    )
     return {
         "engine_html": engine_html,
         "active_html": active_html,
