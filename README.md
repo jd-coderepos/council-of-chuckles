@@ -42,7 +42,7 @@ Council of Chuckles is a whimsical Gradio app for the Hugging Face x Gradio Buil
 ## Submission Links
 
 - Live Space: add the final Hugging Face Space URL after deployment
-- GitHub repo: add the final GitHub URL after pushing
+- GitHub repo: https://github.com/jd-coderepos/council-of-chuckles
 - Demo video: add the demo video URL after recording
 - Social post: add the required social-media post URL before final submission
 
@@ -231,3 +231,4 @@ This app targets Thousand Token Wood, Tiny Titan, Off-Brand Award, Best Demo, Of
 The app loads advisors from `data/advisors.json`. Required fields are `id`, `name`, and `category`. Optional fields include `era`, `role`, `core_wisdom`, `signature_style`, `mastermind_voice`, `comic_voice`, `catchphrase`, `best_for`, `avoid`, `avatar`, and `avatar_alt`.
 
 Legacy `jokester_voice` is supported and normalized to `comic_voice`.
+
