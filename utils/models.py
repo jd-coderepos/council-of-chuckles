@@ -26,14 +26,18 @@ ENABLE_ENGLISH_FALLBACK_MODEL = os.getenv("ENABLE_ENGLISH_FALLBACK_MODEL", "fals
 ENGLISH_FALLBACK_MODEL_ID = os.getenv("ENGLISH_FALLBACK_MODEL_ID", "openbmb/MiniCPM5-1B")
 
 
-def clean_generation(text: str) -> str:
-    """Trim small-model over-generation and repeated endings."""
+def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
+    """Trim small-model over-generation, repeated endings, and runaway dialogue."""
     text = (text or "").strip()
+
+    # Remove markdown fences or separators that small models often add.
+    text = text.replace("```", "").strip()
+    text = text.strip("-").strip()
 
     marker = "The Gavel Falls."
     if marker in text:
         before, _, _after = text.partition(marker)
-        text = before.strip() + "\n\n" + marker
+        text = before.strip()
 
     banned_starts = [
         "The end.",
@@ -41,16 +45,32 @@ def clean_generation(text: str) -> str:
         "If you'd like",
         "If you would like",
         "Would you like",
+        "The Gavel Falls",
     ]
 
     cleaned_lines = []
+    dialogue_lines = 0
+
     for line in text.splitlines():
         stripped = line.strip()
+        if not stripped:
+            continue
+
         if any(stripped.startswith(prefix) for prefix in banned_starts):
             break
-        cleaned_lines.append(line)
 
-    return "\n".join(cleaned_lines).strip()
+        # Keep advisor-like lines only, e.g. "Socrates: ..."
+        if ":" in stripped:
+            cleaned_lines.append(stripped)
+            dialogue_lines += 1
+
+        if dialogue_lines >= max_dialogue_lines:
+            break
+
+    if cleaned_lines:
+        return "\n".join(cleaned_lines).strip()
+
+    return text.strip()
 
 @lru_cache(maxsize=2)
 def load_text_model(model_id: str = TEXT_MODEL_ID):
