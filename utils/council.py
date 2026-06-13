@@ -58,7 +58,7 @@ def make_final_verdict(
         generated, model_status = generate_text(
             prompt,
             max_new_tokens=VERDICT_TOKENS,
-            temperature=0.35,
+            temperature=0.5,
             clean_mode="verdict",
         )
         status_bits.append(f"Verdict: {model_status}")
@@ -159,7 +159,13 @@ def run_council(
         generated = ""
         if use_model:
             prompt = campfire_prompt(topic, output_language, humor_intensity, compassion_level, analysis, active_speakers, plan)
-            generated, model_status = generate_text(prompt, MAX_TOKENS[mode])
+            dialogue_temperature = min(0.9, 0.65 + 0.05 * int(humor_intensity or 0))
+            generated, model_status = generate_text(
+                prompt,
+                MAX_TOKENS[mode],
+                temperature=dialogue_temperature,
+                clean_mode="dialogue",
+            )
             status_bits.append(model_status)
         if generated:
             output_html = render_verdict(disclaimer + ("\n\n" if disclaimer else "") + generated)

@@ -43,17 +43,17 @@ def campfire_lines(
         need = analysis.get("needs", ["clarity"])[0]
         theme = analysis.get("themes", ["uncertainty"])[0]
         if turn["function"] == "comic relief":
-            line = f"Inspired by {advisor['name']}: {advisor.get('catchphrase')}"
+            line = advisor.get("catchphrase") or "The situation is dramatic; your next step does not have to be."
         elif turn["function"] == "practical action":
-            line = f"Inspired by {advisor['name']}: make {need} physical: open the file, send the message, or write the first plain sentence."
+            line = f"Make {need} physical: do one tiny visible action before the stress hires a marching band."
         elif turn["function"] == "challenge":
-            line = f"Inspired by {advisor['name']}: the fear may be loud, but it has not earned veto power over your next step."
+            line = "The irritation may be loud, but it has not been elected president of your nervous system."
         elif turn["function"] == "synthesize":
-            line = f"Inspired by {advisor['name']}: the council sees {theme}; answer it with one small act, not a grand identity trial."
+            line = f"The council sees {theme}; answer it with one small act, not a grand identity trial."
         elif turn["function"] == "reframe":
-            line = f"Inspired by {advisor['name']}: this is not proof that you are failing; it is information asking for a kinder plan."
+            line = "This is information, not a prophecy; let it shrink back to normal human size."
         else:
-            line = f"Inspired by {advisor['name']}: begin by naming the concern without letting it become your whole weather system."
+            line = "Name the concern before it becomes your whole weather system with office furniture."
         if output_language != "English":
             line = f"[Fallback English; requested {output_language}] {line}"
         lines.append((advisor, line, turn["function"], turn["trigger_reason"]))

@@ -190,8 +190,7 @@ At high comedy levels, use absurd but kind metaphors and playful exaggeration.
 Keep humor aimed at the situation, not at insulting the user or other people.
 Each line must be short: maximum 18 words.
 Do not explain the metaphor. Do not write long inspirational paragraphs.
-After the dialogue lines, write exactly one final line:
-The Gavel Falls.
-Stop immediately after that line.
+Do not write "The Gavel Falls"; the app generates the final verdict separately.
+Output only the advisor dialogue lines.
 """
 
