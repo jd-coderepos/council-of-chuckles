@@ -28,10 +28,10 @@ MAX_TOKENS = {
     "Mastermind Mode": 160,
     "Comic Relief Mode": 160,
     "Council Mode": 280,
-    "Campfire Council Mode": 260,
+    "Campfire Council Mode": 360,
 }
 
-VERDICT_TOKENS = 240
+VERDICT_TOKENS = 280
 
 def make_final_verdict(
     topic: str,

@@ -111,7 +111,7 @@ def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
     return text.strip()
 
 def clean_verdict_generation(text: str) -> str:
-    """Clean Tiny Aya verdict output without treating it like advisor dialogue."""
+    """Clean Tiny Aya verdict output without cutting lines mid-thought."""
     text = (text or "").strip()
     text = text.replace("```", "").strip()
     text = text.strip("-").strip()
@@ -123,8 +123,7 @@ def clean_verdict_generation(text: str) -> str:
     else:
         text = "The Gavel Falls:\n" + text
 
-    allowed_labels = [
-        "The Gavel Falls:",
+    labels = [
         "What the council agrees on:",
         "What they disagree on:",
         "Hidden pattern:",
@@ -132,39 +131,49 @@ def clean_verdict_generation(text: str) -> str:
         "Ridiculous but useful reminder:",
     ]
 
-    cleaned_lines = []
+    def tidy_value(value: str, max_words: int = 26) -> str:
+        value = " ".join(value.strip().split())
+        if not value:
+            return ""
 
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
+        # Prefer a complete first sentence rather than cutting at an arbitrary word.
+        sentence_ends = [".", "!", "?"]
+        first_end_positions = [value.find(p) for p in sentence_ends if value.find(p) != -1]
+        if first_end_positions:
+            first_end = min(first_end_positions)
+            first_sentence = value[: first_end + 1].strip()
+            if len(first_sentence.split()) <= max_words:
+                return first_sentence
 
-        if line.startswith("The Gavel Falls:"):
-            cleaned_lines.append("The Gavel Falls:")
-            trailing = line.replace("The Gavel Falls:", "", 1).strip()
+        words = value.split()
+        if len(words) <= max_words:
+            return value if value[-1] in ".!?" else value + "."
 
-            # If Aya put content on the header line, move it into the first verdict item.
-            if trailing and not trailing.startswith("What the council agrees on:"):
-                line = f"What the council agrees on: {trailing}"
-            else:
-                continue
+        # Last resort: trim, but avoid leaving dangling words.
+        trimmed = " ".join(words[:max_words]).rstrip(",;:")
+        dangling = {"and", "or", "but", "because", "with", "without", "to", "of", "the", "a"}
+        while trimmed.split() and trimmed.split()[-1].lower() in dangling:
+            trimmed = " ".join(trimmed.split()[:-1])
+        return trimmed + "."
 
-        if any(line.startswith(label) for label in allowed_labels[1:]):
-            words = line.split()
+    lines = ["The Gavel Falls:"]
 
-            # Prevent long rambling verdict lines.
-            if len(words) > 30:
-                line = " ".join(words[:30]).rstrip(",;:") + "."
+    for label in labels:
+        if label in text:
+            after = text.split(label, 1)[1]
+            next_positions = [
+                after.find(next_label)
+                for next_label in labels
+                if next_label != label and after.find(next_label) != -1
+            ]
+            if next_positions:
+                after = after[: min(next_positions)]
 
-            if line[-1] not in ".!?":
-                line = line.rstrip(",;:") + "."
+            value = tidy_value(after, max_words=24)
+            if value:
+                lines.append(f"{label} {value}")
 
-            cleaned_lines.append(line)
-
-        if len(cleaned_lines) >= 6:
-            break
-
-    return "\n".join(cleaned_lines).strip()
+    return "\n".join(lines).strip()
 
 @lru_cache(maxsize=2)
 def load_text_model(model_id: str = TEXT_MODEL_ID):

@@ -184,10 +184,12 @@ Each dialogue line must be on one line only, in this exact format:
 Advisor Name: one concise sentence
 Each line must directly address the user's topic.
 Each line must include useful advice and at least a subtle comic twist.
+Use the user's own words as comic material when safe, such as "bananas", "purple buttons", or "deadline gremlin".
 At low comedy levels, use dry wit or gentle irony.
 At high comedy levels, use absurd but kind metaphors and playful exaggeration.
 Keep humor aimed at the situation, not at insulting the user or other people.
-Each line must be concise: maximum 28 words.
+Each line must be short: maximum 18 words.
+Do not explain the metaphor. Do not write long inspirational paragraphs.
 After the dialogue lines, write exactly one final line:
 The Gavel Falls.
 Stop immediately after that line.

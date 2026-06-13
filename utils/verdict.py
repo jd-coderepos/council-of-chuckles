@@ -27,25 +27,26 @@ Detected needs: {', '.join(analysis.get('needs', []))}
 Advisors: {speaker_names}
 
 Rules:
+- Write a comic synthesis, not a serious advice summary.
 - Base the verdict on the council discussion, but do not copy any council line verbatim.
-- Synthesize the advice into fresh wording.
 - Use concrete details from the user's question.
+- Use the user's own funny words when safe, such as "bananas", "purple buttons", or "deadline".
+- Make the problem feel smaller and more manageable.
 - Do not continue the council dialogue.
 - Do not write advisor names.
-- Do not use generic therapy language.
-- Do not say "not a verdict on your worth".
+- Do not insult the user or real people.
+- Do not use generic phrases like "workplace dynamics", "root cause", "prioritize self-care", or "not a verdict on your worth".
 - Do not mention academic anxiety unless the user question is clearly academic.
-- Keep each verdict item to one short sentence.
-- Do not write anything after the final "Ridiculous but useful reminder" line.
+- Keep each verdict item to one short, witty sentence.
 - Output only the structure below.
 
 Use this exact structure:
 The Gavel Falls:
-What the council agrees on: <one short sentence>
-What they disagree on: <one short sentence>
-Hidden pattern: <one short sentence>
+What the council agrees on: <funny practical synthesis>
+What they disagree on: <playful contrast between approaches>
+Hidden pattern: <comic reframe of the real issue>
 Tiny next action: <one concrete action>
-Ridiculous but useful reminder: <one witty sentence>
+Ridiculous but useful reminder: <one absurd but kind image from the user's situation>
 """
 
 
