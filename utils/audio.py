@@ -95,17 +95,31 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
         )
 
         audio_chunk_index = inputs.get("audio_chunk_index")
+
+        # Move tensor inputs to the model device first.
         inputs.to(model.device, dtype=model.dtype)
 
-        with torch.inference_mode():
-            outputs = model.generate(**inputs, max_new_tokens=256)
+        # The Cohere processor may return metadata fields such as "length".
+        # These are useful for preprocessing/decoding, but model.generate()
+        # should receive only actual model inputs.
+        generation_inputs = {
+            key: value
+            for key, value in inputs.items()
+            if key not in {"length", "audio_chunk_index"}
+        }
 
-        decoded = processor.decode(
-            outputs,
-            skip_special_tokens=True,
-            audio_chunk_index=audio_chunk_index,
-            language=language_code,
-        )
+        print(f"[ASR] processor keys={list(inputs.keys())}")
+        print(f"[ASR] generation keys={list(generation_inputs.keys())}")
+
+        with torch.inference_mode():
+            outputs = model.generate(**generation_inputs, max_new_tokens=256)
+
+        decode_kwargs = {"skip_special_tokens": True}
+        if audio_chunk_index is not None:
+            decode_kwargs["audio_chunk_index"] = audio_chunk_index
+            decode_kwargs["language"] = language_code
+
+        decoded = processor.decode(outputs, **decode_kwargs)
 
         if isinstance(decoded, list):
             text = decoded[0] if decoded else ""
