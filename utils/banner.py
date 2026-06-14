@@ -8,8 +8,8 @@ HERO_HTML = """
     <h1>Small Models. Big Chuckles.</h1>
     <p class="subtitle">Speak a question, assemble a tiny council, and get practical wisdom with a wink.</p>
     <div class="badges">
-        <span class="badge">Voice-forward</span>
-        <span class="badge">15 spoken languages</span>
+        <span class="badge">Voice: 15 languages</span>
+        <span class="badge">Whisper small ASR</span>
         <span class="badge">70+ reply languages</span>
         <span class="badge">Tiny Aya Water</span>
         <span class="badge">Council Engine</span>
