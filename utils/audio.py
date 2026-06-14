@@ -26,6 +26,10 @@ ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "CohereLabs/cohere-transcribe-03-2026")
 TTS_MODEL_ID = os.getenv("TTS_MODEL_ID", "openbmb/VoxCPM2")
 ENABLE_VOICE_INPUT = os.getenv("ENABLE_VOICE_INPUT", "true").lower() == "true"
 ENABLE_TTS = os.getenv("ENABLE_TTS", "false").lower() == "true"
+ASR_FALLBACK_MESSAGE = (
+    "Voice input is currently wandering in the woods. "
+    "Please type your question instead."
+)
 
 
 LANGUAGE_TO_CODE = {
@@ -76,6 +80,7 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
         return "", "Voice input is currently disabled. Please type your question instead."
 
     try:
+        import numpy as np
         from transformers.audio_utils import load_audio
 
         language_code = LANGUAGE_TO_CODE.get(spoken_language, "en")
@@ -85,10 +90,25 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
 
         processor, model, torch = _load_asr_model()
 
-        audio = load_audio(audio_path, sampling_rate=16000)
+        audio = np.asarray(load_audio(audio_path, sampling_rate=16000), dtype=np.float32)
+        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
+
+        if audio.ndim > 1:
+            audio = audio.mean(axis=-1)
+
+        if audio.size == 0:
+            return "", "I could not find any audio in that recording. Please try again."
+
+        duration_s = audio.size / 16000
+        peak = float(np.max(np.abs(audio))) if audio.size else 0.0
+        if duration_s < 0.25 or peak < 1e-5:
+            return "", "I could not catch enough speech there. Please try a slightly longer recording."
+
+        if peak > 1.0:
+            audio = audio / peak
 
         inputs = processor(
-            audio,
+            audio=audio,
             sampling_rate=16000,
             return_tensors="pt",
             language=language_code,
@@ -96,23 +116,15 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
 
         audio_chunk_index = inputs.get("audio_chunk_index")
 
-        # Move tensor inputs to the model device first.
+        # Keep Cohere's processor payload intact; generate() uses fields such
+        # as "length" to route short and chunked audio correctly.
         inputs.to(model.device, dtype=model.dtype)
 
-        # The Cohere processor may return metadata fields such as "length".
-        # These are useful for preprocessing/decoding, but model.generate()
-        # should receive only actual model inputs.
-        generation_inputs = {
-            key: value
-            for key, value in inputs.items()
-            if key != "length"
-        }
-
         print(f"[ASR] processor keys={list(inputs.keys())}")
-        print(f"[ASR] generation keys={list(generation_inputs.keys())}")
+        print(f"[ASR] duration_s={duration_s:.2f}, peak={peak:.4f}")
 
         with torch.inference_mode():
-            outputs = model.generate(**generation_inputs, max_new_tokens=256)
+            outputs = model.generate(**inputs, max_new_tokens=256)
 
         decode_kwargs = {"skip_special_tokens": True}
         if audio_chunk_index is not None:
@@ -139,7 +151,7 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
     except Exception as exc:
         print("[ASR ERROR]")
         traceback.print_exc()
-        return "", f"ASR error: {type(exc).__name__}: {exc}"
+        return "", ASR_FALLBACK_MESSAGE
 
 
 def synthesize_speech(text: str, language: str) -> tuple[str | None, str]:
