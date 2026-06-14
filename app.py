@@ -445,9 +445,20 @@ CSS = """
   border: 1px solid var(--line) !important;
   background: rgba(255, 255, 255, .94) !important;
 }
-.stage {
+.left-rail,
+.right-rail {
+  align-self: start !important;
+  min-width: 0 !important;
+}
+
+.right-rail {
   position: sticky !important;
-  top: 14px;
+  top: 14px !important;
+  z-index: 3 !important;
+}
+
+.stage {
+  position: static !important;
   background:
     radial-gradient(circle at 94% 10%, rgba(255, 176, 0, .2), transparent 10rem),
     linear-gradient(150deg, #2b163b, #1b1024) !important;
@@ -764,7 +775,14 @@ footer.engine-panel p { color: var(--muted); }
   .thinker-sticker.confucius { width: 90px; left: 10%; top: 148px; }
   .thinker-sticker.rumi { width: 86px; left: 39%; top: 210px; }
   .thinker-sticker.jung { width: 88px; left: 74%; top: 198px; }
-  .stage { position: static !important; max-height: none; }
+  .right-rail {
+    position: static !important;
+  }
+
+  .stage {
+    max-height: none !important;
+    overflow: visible !important;
+  }
 }
 
 @media (max-width: 620px) {
@@ -787,7 +805,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
         gr.HTML(HERO_HTML)
 
         with gr.Row(elem_classes=["app-shell"]):
-            with gr.Column(scale=5, min_width=340):
+            with gr.Column(scale=5, min_width=340, elem_classes=["left-rail"]):
                 with gr.Group(elem_classes=["panel", "voice-card"]):
                     gr.HTML(
                         """
@@ -938,7 +956,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                     with gr.Row(elem_classes=["actions"]):
                         generate_btn = gr.Button("Generate Council", variant="primary")
 
-            with gr.Column(scale=7, min_width=520):
+            with gr.Column(scale=7, min_width=520, elem_classes=["right-rail"]):
                 with gr.Group(elem_classes=["panel", "stage"]):
                     gr.HTML(
                         """
