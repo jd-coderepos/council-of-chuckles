@@ -218,8 +218,8 @@ CSS = """
   border-radius: 999px !important;
   background: rgba(255, 255, 255, .88) !important;
   color: var(--ink) !important;
-  font-size: .95rem !important;
-  font-weight: 950 !important;
+  font-size: .9rem !important;
+  font-weight: 900 !important;
   box-shadow: 4px 4px 0 var(--gold) !important;
 }
 .brand-mark {
@@ -242,19 +242,21 @@ CSS = """
 .gradio-container .hero h1 {
   margin: 26px 0 14px !important;
   max-width: 760px !important;
-  font-size: clamp(4rem, 8.4vw, 7.75rem) !important;
+  font-size: clamp(4rem, 8.1vw, 7.45rem) !important;
   line-height: .82 !important;
-  letter-spacing: -0.03em !important;
+  letter-spacing: 0 !important;
   color: var(--ink) !important;
-  font-weight: 950 !important;
+  font-weight: 700 !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  text-wrap: balance;
 }
 
 .gradio-container .hero .subtitle {
   max-width: 650px !important;
   margin: 0 !important;
   color: var(--muted) !important;
-  font-size: 1.22rem !important;
-  line-height: 1.48 !important;
+  font-size: 1.18rem !important;
+  line-height: 1.5 !important;
   font-weight: 720 !important;
 }
 .badges,
@@ -291,8 +293,8 @@ CSS = """
   font-weight: 850;
 }
 .gradio-container .hero .badge {
-  color: var(--ink) !important;
-  font-weight: 900 !important;
+  color: var(--muted) !important;
+  font-weight: 850 !important;
 }
 .tag {
   background: var(--violet);
