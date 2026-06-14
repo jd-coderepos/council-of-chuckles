@@ -49,47 +49,46 @@ def render_avatar(advisor: dict) -> str:
 
 
 def render_advisor_card(advisor: dict, selected: bool) -> str:
-    tags = "".join(f'<span class="tag">{_escape(tag)}</span>' for tag in advisor.get("best_for", [])[:3])
-    archetype = " / ".join(advisor.get("archetypes", ["Sage"])[:2])
-    selected_badge = '<span class="selected-badge">In your council</span>' if selected else ""
-    checkmark = '<span class="checkmark">✓</span>' if selected else ""
+    tags = "".join(f'<span class="tag">{_escape(tag)}</span>' for tag in advisor.get("best_for", [])[:2])
     return f"""
-    <div class="advisor-tile {'selected' if selected else ''}">
-      {checkmark}
-      <div class="tile-top">{render_avatar(advisor)}<div><h4>{_escape(advisor['name'])}</h4><p>{_escape(advisor['category'])}</p></div></div>
-      <div class="archetype">{_escape(archetype)}</div>
+    <article class="advisor {'selected' if selected else ''}">
+      <div class="advisor-head">
+        {render_avatar(advisor)}
+        <div>
+          <strong>{_escape(advisor['name'])}</strong><br>
+          <small>{_escape(advisor['category'])}</small>
+        </div>
+      </div>
       <div class="tags">{tags}</div>
-      {selected_badge}
-    </div>
+    </article>
     """
-
 
 def render_advisor_gallery(advisors: list[dict], selected_ids: list[str]) -> str:
     if not advisors:
         return '<div class="empty">No advisors match this search.</div>'
     selected = set(selected_ids or [])
     cards = "".join(render_advisor_card(advisor, advisor["id"] in selected) for advisor in advisors)
-    return f'<div class="advisor-gallery">{cards}</div>'
+    return f'<div class="advisor-grid">{cards}</div>'
 
 
 def render_selected_council_chips(advisors: list[dict]) -> str:
     if not advisors:
-        return '<div class="chip-row muted">No council members selected yet.</div>'
+        return '<div class="tray muted">No council members selected yet.</div>'
     chips = "".join(
-        f'<span class="avatar-chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}</span></span>'
+        f'<span class="chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}</span></span>'
         for advisor in advisors
     )
-    return f'<div class="chip-row">{chips}</div>'
+    return f'<div class="tray">{chips}</div>'
 
 
 def render_active_speaker_row(advisors: list[dict]) -> str:
     if not advisors:
-        return '<div class="active-row muted">No active speakers yet.</div>'
+        return '<div class="speakers muted">No active speakers yet.</div>'
     chips = "".join(
-        f'<span class="active-chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}</span></span>'
+        f'<span class="chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}</span></span>'
         for advisor in advisors
     )
-    return f'<div class="active-row"><strong>Active Speakers</strong>{chips}</div>'
+    return f'<div><h3>Active speakers</h3><div class="speakers">{chips}</div></div>'
 
 
 def render_engine_panel(analysis: dict, active_speakers: list[dict], strategy: str, reasons: dict[str, str]) -> str:
@@ -144,7 +143,12 @@ def render_dialogue_turn(advisor: dict, line: str, turn_function: str, trigger: 
 
 
 def render_verdict(text: str) -> str:
-    return f'<article class="verdict-card"><div class="response-body">{_format_text(text)}</div></article>'
+    return f"""
+    <article class="takeaway">
+      <strong>Tiny Gavel</strong>
+      <div class="response-body">{_format_text(text)}</div>
+    </article>
+    """
 
 
 def _format_text(text: str) -> str:

@@ -4,6 +4,7 @@ import random
 
 import gradio as gr
 
+from utils.banner import HERO_HTML
 from utils.advisors import advisor_by_id, category_options, filter_advisors, load_advisors
 from utils.audio import transcribe_audio
 from utils.council import run_council
@@ -187,198 +188,705 @@ def export_session(session: list[dict] | None):
 
 CSS = """
 :root {
-  --forest: #10180f;
-  --moss: #7fab6c;
-  --amber: #f0ae4b;
-  --ember: #f06f45;
-  --violet: #a78bfa;
-  --paper: #fff8dd;
+  --cream: #fff8ee;
+  --paper: #ffffff;
+  --ink: #101010;
+  --muted: #695f56;
+  --line: #ecd5b1;
+  --orange: #ff7a18;
+  --gold: #ffb000;
+  --ember: #ff4f1f;
+  --plum: #251235;
+  --violet: #efe6ff;
+  --green: #ddf8d0;
+  --blue: #e0f2ff;
+  --shadow: 0 18px 46px rgba(67, 38, 15, .14);
 }
+
+* { box-sizing: border-box; }
+
 .gradio-container {
-  background: radial-gradient(circle at 25% 10%, rgba(167,139,250,.22), transparent 28%),
-              radial-gradient(circle at 80% 15%, rgba(240,174,75,.16), transparent 24%),
-              linear-gradient(140deg, #0b120d 0%, #172111 45%, #241433 100%) !important;
-  color: var(--paper);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 176, 0, .08) 25%, transparent 25%) 0 0 / 42px 42px,
+    linear-gradient(225deg, rgba(255, 176, 0, .08) 25%, transparent 25%) 0 0 / 42px 42px,
+    var(--cream) !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
-.main-wrap { max-width: 1380px; margin: 0 auto; }
+
+.gradio-container .main-wrap {
+  width: min(1240px, calc(100% - 32px));
+  max-width: none;
+  margin: 0 auto;
+}
+
+/* Hide Gradio's default surrounding panels so the custom panels carry the design. */
+.gradio-container .panel,
+.gradio-container .voice-card,
+.gradio-container .stage {
+  overflow: visible;
+}
+
 .hero {
-  min-height: 230px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-bottom: 1px solid rgba(255,255,255,.12);
+  position: relative;
+  min-height: 460px;
+  overflow: hidden;
+  padding: 34px 0 26px;
 }
-.hero h1 { font-size: clamp(2.4rem, 6vw, 5.4rem); margin: 0; line-height: 1; color: #fff5cf; }
-.hero p { font-size: 1.1rem; max-width: 820px; color: #eadfb9; }
-.badge-row, .tags, .chip-row, .active-row, .triggered { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
-.badge, .tag, .archetype, .selected-badge, .trigger, .disclaimer {
-  border: 1px solid rgba(255,255,255,.16);
+.hero::before {
+  content: "";
+  position: absolute;
+  right: -70px;
+  top: 76px;
+  width: min(58vw, 760px);
+  height: 390px;
+  border-radius: 44% 56% 42% 58% / 58% 42% 58% 42%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 44%, var(--ember) 100%);
+  transform: rotate(-7deg);
+}
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 410px;
+  gap: 28px;
+  align-items: center;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
   border-radius: 999px;
-  padding: .22rem .55rem;
-  background: rgba(255,255,255,.08);
-  color: #fff4cf;
-  font-size: .78rem;
+  background: rgba(255, 255, 255, .88);
+  font-weight: 950;
+  box-shadow: 4px 4px 0 var(--gold);
 }
-.tag.warm { background: rgba(240,174,75,.18); }
-.advisor-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .75rem; max-height: 610px; overflow: auto; padding-right: .25rem; }
-.advisor-tile, .response-card, .engine-panel, .verdict-card, .dialogue-turn .bubble {
-  background: rgba(18, 25, 18, .82);
-  border: 1px solid rgba(255,255,255,.13);
-  box-shadow: 0 12px 36px rgba(0,0,0,.28);
+.brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--orange);
+  position: relative;
+  transform: rotate(45deg);
+}
+.brand-mark::before,
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px solid #fff6df;
+  border-radius: 5px;
+}
+.brand-mark::after { inset: 9px; }
+.hero h1 {
+  margin: 26px 0 14px;
+  max-width: 760px;
+  font-size: clamp(4rem, 8.4vw, 7.75rem);
+  line-height: .82;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.subtitle {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.22rem;
+  line-height: 1.48;
+  font-weight: 720;
+}
+.badges,
+.actions,
+.tray,
+.chips,
+.speakers,
+.tags,
+.triggered {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.badges { margin-top: 24px; }
+.badge,
+.pill,
+.chip,
+.tag,
+.archetype,
+.selected-badge,
+.trigger,
+.disclaimer,
+.trigger-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .88);
+  color: var(--muted);
+  padding: 8px 12px;
+  font-size: .86rem;
+  font-weight: 850;
+}
+.tag {
+  background: var(--violet);
+  color: #442053;
+  padding: 5px 8px;
+  font-size: .74rem;
+}
+.tag.warm { background: #fff1d0; color: #684016; }
+.disclaimer,
+.trigger { margin: 8px 6px 0 0; }
+.trigger-chip {
+  background: rgba(255,247,234,.9);
+  color: var(--ink);
+}
+.trigger-chip em {
+  display: block;
+  color: var(--muted);
+  font-size: .72rem;
+  font-style: normal;
+}
+
+/* SVG thinker sticker banner. */
+.hero-art {
+  min-height: 396px;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+.hero-art::before {
+  content: "";
+  position: absolute;
+  right: -14px;
+  top: 6px;
+  width: 101%;
+  height: 366px;
+  border-radius: 48% 52% 46% 54% / 54% 46% 54% 46%;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255,255,255,.12), transparent 0 23%),
+    radial-gradient(circle at 78% 72%, rgba(255,255,255,.13), transparent 0 18%),
+    linear-gradient(135deg, rgba(255,176,0,.34), rgba(255,79,31,.08));
+  z-index: -1;
+}
+.thinker-sticker {
+  position: absolute;
+  width: 102px;
+  text-align: center;
+  transform: rotate(var(--tilt, 0deg));
+  filter: drop-shadow(0 18px 20px rgba(61, 26, 0, .23));
+  z-index: 2;
+}
+.thinker-sticker svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
+}
+.thinker-label {
+  display: inline-block;
+  position: relative;
+  z-index: 3;
+  margin-top: -10px;
+  padding: 5px 10px 6px;
+  border: 2px solid #111;
+  border-radius: 999px;
+  background: #fff7ea;
+  color: #111;
+  box-shadow: 4px 4px 0 rgba(255, 176, 0, .92);
+  font-size: .72rem;
+  line-height: 1;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.thinker-sticker.feature { width: 136px; left: 266px; top: 146px; --tilt: 2deg; }
+.thinker-sticker.socrates { width: 100px; left: 138px; top: 28px; --tilt: 6deg; }
+.thinker-sticker.aristotle { width: 92px; left: 244px; top: 18px; --tilt: 8deg; }
+.thinker-sticker.confucius { width: 102px; left: 54px; top: 176px; --tilt: -6deg; }
+.thinker-sticker.rumi { width: 98px; left: 170px; top: 246px; --tilt: -5deg; }
+.thinker-sticker.jung { width: 100px; left: 362px; top: 228px; --tilt: 4deg; }
+.thinker-sticker.feature .thinker-label {
+  font-size: .82rem;
+  margin-top: -14px;
+  padding: 7px 12px 8px;
+}
+.spark {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--gold);
+  border-radius: 55% 45% 50% 50%;
+  transform: rotate(28deg);
+  right: 18px;
+  top: 26px;
+  box-shadow:
+    -32px 38px 0 rgba(255, 247, 234, .85),
+    -68px 12px 0 rgba(255, 176, 0, .75),
+    -104px 62px 0 rgba(255, 247, 234, .7);
+}
+
+/* Main app structure. */
+.app-shell {
+  display: grid !important;
+  grid-template-columns: minmax(340px, .9fr) minmax(0, 1.4fr) !important;
+  gap: 18px !important;
+  padding: 8px 0 48px;
+  align-items: start !important;
+}
+.app-shell > * { min-width: 0; }
+.panel {
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, .94) !important;
+  box-shadow: var(--shadow) !important;
+  padding: 18px !important;
+  color: var(--ink) !important;
+}
+.panel + .panel { margin-top: 16px; }
+.voice-card {
+  border: 2px solid var(--orange) !important;
+  background: linear-gradient(135deg, #fff9e9, #fff) !important;
+}
+.stage {
+  position: sticky !important;
+  top: 14px;
+  background:
+    radial-gradient(circle at 94% 10%, rgba(255, 176, 0, .2), transparent 10rem),
+    linear-gradient(150deg, #2b163b, #1b1024) !important;
+  color: #fff7ea !important;
+  border-color: rgba(37, 18, 53, .7) !important;
+  max-height: calc(100vh - 28px);
+  overflow: auto !important;
+}
+.stage .badge,
+.stage .chip {
+  background: rgba(255,255,255,.12);
+  color: #fff7ea;
+  border-color: rgba(255,247,234,.26);
+}
+.stage .muted { color: #f0d9bd; }
+.stage .avatar-fallback,
+.stage .avatar-img { color: var(--ink); }
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.panel-title h2,
+.panel h3,
+.stage h3 {
+  margin: 0;
+  letter-spacing: 0;
+}
+.panel-title h2 { font-size: 1.32rem; }
+.stage h3 { color: #fff7ea; }
+.number {
+  color: var(--orange);
+  font-weight: 950;
+  margin-right: 7px;
+}
+
+/* Gradio form controls. */
+.gradio-container label,
+.gradio-container .block-label,
+.gradio-container .wrap label {
+  color: var(--muted) !important;
+  font-size: .82rem !important;
+  font-weight: 850 !important;
+}
+.gradio-container input,
+.gradio-container select,
+.gradio-container textarea {
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: #fffdf8 !important;
+  color: var(--ink) !important;
+}
+.gradio-container input:focus,
+.gradio-container select:focus,
+.gradio-container textarea:focus {
+  border-color: var(--orange) !important;
+  box-shadow: 0 0 0 3px rgba(255, 122, 24, .18) !important;
+}
+.gradio-container button {
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: #fffdf8 !important;
+  color: var(--ink) !important;
+  font-weight: 900 !important;
+  box-shadow: 0 3px 0 rgba(236, 213, 177, .7) !important;
+}
+.gradio-container button.primary {
+  border-color: #e46913 !important;
+  background: linear-gradient(135deg, var(--gold), var(--orange), var(--ember)) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 9px 18px rgba(255, 122, 24, .28) !important;
+  min-width: 220px;
+}
+.stage button {
+  background: rgba(255,255,255,.92) !important;
+}
+
+/* Advisor cards and selected council tray. */
+.tray {
+  border: 1px dashed #e3bd7e;
+  background: #fff7e6;
+  padding: 12px;
   border-radius: 8px;
+  margin: 12px 0;
 }
-.advisor-tile { position: relative; padding: .8rem; transition: transform .16s ease, border-color .16s ease; }
-.advisor-tile:hover { transform: translateY(-2px); border-color: rgba(240,174,75,.55); }
-.advisor-tile.selected { border-color: var(--amber); box-shadow: 0 0 0 1px rgba(240,174,75,.45), 0 12px 36px rgba(0,0,0,.28); }
-.tile-top, .response-card header { display: flex; gap: .7rem; align-items: center; }
-.tile-top h4, .response-card h3 { margin: 0; color: #fff6d6; font-size: 1rem; }
-.tile-top p, .response-card p { margin: .12rem 0 0; color: #d8cfab; font-size: .83rem; }
-.avatar-fallback, .avatar-img {
-  width: 42px; height: 42px; min-width: 42px; border-radius: 50%;
-  display: grid; place-items: center; font-weight: 800; color: #172111;
-  background: linear-gradient(135deg, #fff2bd, var(--ring, #f0ae4b));
-  border: 2px solid var(--ring, #f0ae4b);
+.advisor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 4px;
 }
-.avatar-img { object-fit: cover; background: transparent; }
-.checkmark { position: absolute; top: .55rem; right: .55rem; color: var(--amber); font-weight: 900; }
-.selected-badge { display: inline-block; margin-top: .65rem; background: rgba(240,174,75,.18); }
-.avatar-chip, .active-chip, .trigger-chip { display: inline-flex; align-items: center; gap: .4rem; padding: .28rem .55rem; border-radius: 999px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13); }
-.avatar-chip .avatar-fallback, .avatar-chip .avatar-img, .active-chip .avatar-fallback, .active-chip .avatar-img, .trigger-chip .avatar-fallback, .trigger-chip .avatar-img { width: 28px; height: 28px; min-width: 28px; font-size: .72rem; }
-.trigger-chip em { display: block; color: #d8cfab; font-size: .72rem; font-style: normal; }
-.engine-panel, .response-card, .verdict-card { padding: 1rem; margin: .8rem 0; }
-.engine-panel h3 { margin: 0 0 .35rem; color: #ffe2a8; }
-.engine-panel p { color: #ddd2ad; margin: .3rem 0 .8rem; }
-.engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .8rem; margin-bottom: .8rem; }
-.active-row { padding: .75rem 0; }
-.response-body { line-height: 1.55; color: #fff7d8; }
-.dialogue-turn { display: flex; gap: .75rem; margin: .75rem 0; align-items: flex-start; }
-.dialogue-turn .bubble { padding: .8rem 1rem; flex: 1; }
-.dialogue-turn .bubble span { display: block; color: #d8cfab; font-size: .8rem; margin-top: .1rem; }
-.verdict-card { border-color: rgba(240,174,75,.4); background: rgba(45, 28, 13, .78); }
-.empty, .muted { color: #d8cfab; padding: .7rem; }
-button.primary { background: linear-gradient(135deg, var(--amber), var(--ember)) !important; color: #1c1208 !important; font-weight: 800 !important; }
+.advisor {
+  min-height: 126px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffefb;
+  padding: 12px;
+  position: relative;
+}
+.advisor.selected {
+  background: linear-gradient(180deg, #fffefa, #fff1d0);
+  border-color: var(--orange);
+}
+.advisor.selected::after {
+  content: "In council";
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: .68rem;
+  font-weight: 900;
+}
+.advisor-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-right: 72px;
+}
+.advisor small,
+.muted { color: var(--muted); font-weight: 750; }
+.avatar-fallback,
+.avatar-img {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border: 2px solid #9d6616;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe66a, #ffc21a);
+  color: var(--ink);
+  font-size: .76rem;
+  font-weight: 950;
+  object-fit: cover;
+}
+.chip .avatar-fallback,
+.chip .avatar-img,
+.trigger-chip .avatar-fallback,
+.trigger-chip .avatar-img {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+}
+
+/* Stage output. Keep compatibility with old renderer class names. */
+.engine-panel,
+.response-card,
+.verdict-card,
+.dialogue-turn .bubble {
+  border-radius: 8px;
+  padding: 13px;
+  margin: 12px 0;
+}
+.engine-panel {
+  border: 1px solid rgba(255,247,234,.22);
+  background: rgba(255,255,255,.1);
+}
+.engine-panel h3,
+.response-card h3 {
+  margin: 0 0 6px;
+  color: #fff7ea;
+}
+.engine-panel p {
+  color: #f0d9bd;
+  margin: .3rem 0 .8rem;
+}
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .8rem;
+  margin-bottom: .8rem;
+}
+.engine-strategy { color: #fff7ea; margin-bottom: .55rem; }
+.response-card {
+  background: #fff7ea;
+  color: var(--ink);
+  border: 1px solid #ffd89b;
+}
+.response-card header {
+  display: flex;
+  gap: .7rem;
+  align-items: center;
+}
+.response-card h3 { color: var(--ink); }
+.response-card p,
+.response-card .response-body {
+  color: var(--ink);
+}
+.response-body {
+  line-height: 1.55;
+}
+.dialogue-turn {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  margin-top: 12px;
+}
+.dialogue-turn .bubble {
+  background: #fff7ea;
+  color: var(--ink);
+  border: 1px solid #ffd89b;
+}
+.dialogue-turn .bubble span {
+  display: block;
+  color: var(--muted);
+  font-size: .8rem;
+  margin-top: .1rem;
+}
+.dialogue-turn .bubble p {
+  margin: 6px 0 0;
+  line-height: 1.45;
+}
+.takeaway,
+.verdict-card {
+  background: linear-gradient(135deg, #fff7ea, #ffe6ad);
+  color: var(--ink);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 14px;
+}
+.empty {
+  color: var(--muted);
+  padding: .7rem;
+}
+footer.engine-panel {
+  margin: 0 0 40px;
+  background: rgba(255, 255, 255, .85);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+footer.engine-panel p { color: var(--muted); }
+
+@media (max-width: 1040px) {
+  .hero { min-height: auto; }
+  .hero::before { opacity: .42; right: -260px; top: 150px; }
+  .hero-grid,
+  .app-shell {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-art { min-height: 318px; }
+  .hero-art::before { right: 0; top: 8px; width: 100%; height: 300px; }
+  .thinker-sticker.feature { width: 122px; left: 64%; top: 116px; }
+  .thinker-sticker.socrates { width: 88px; left: 35%; top: 24px; }
+  .thinker-sticker.aristotle { width: 82px; left: 58%; top: 18px; }
+  .thinker-sticker.confucius { width: 90px; left: 12%; top: 148px; }
+  .thinker-sticker.rumi { width: 86px; left: 42%; top: 210px; }
+  .thinker-sticker.jung { width: 88px; left: 78%; top: 198px; }
+  .stage { position: static !important; max-height: none; }
+}
+
+@media (max-width: 620px) {
+  .gradio-container .main-wrap { width: min(100% - 20px, 1240px); }
+  .hero h1 { font-size: 3.45rem; }
+  .hero-art { display: none; }
+  .advisor-grid { grid-template-columns: 1fr; }
+  .panel-title { align-items: flex-start; flex-direction: column; }
+  .gradio-container button,
+  .gradio-container button.primary { width: 100%; min-width: 0; }
+}
 """
 
 
-with gr.Blocks(css=CSS, title="Council of Chuckles") as demo:
+with gr.Blocks(title="Council of Chuckles") as demo:
     selected_state = gr.State(DEFAULT_SELECTED_IDS)
     session_state = gr.State([])
 
     with gr.Column(elem_classes=["main-wrap"]):
-        gr.HTML(
-            """
-            <section class="hero">
-              <h1>Council of Chuckles</h1>
-              <p>Assemble your Mastermind Alliance. Ask a serious question. Receive wisdom with a wink.</p>
-              <div class="badge-row">
-                <span class="badge">Thousand Token Wood</span>
-                <span class="badge">Tiny Aya Water</span>
-                <span class="badge">70+ text languages</span>
-                <span class="badge">14 voice languages</span>
-                <span class="badge">32B cap friendly</span>
-                <span class="badge">Voice optional</span>
-                <span class="badge">No paid APIs</span>
-                <span class="badge">Council Engine</span>
-              </div>
-            </section>
-            """
-        )
+        gr.HTML(HERO_HTML)
 
-        with gr.Row():
-            with gr.Column(scale=1, min_width=320):
-                gr.Markdown("### Mastermind Alliance")
-                search = gr.Textbox(label="Advisor search", placeholder="Search names, roles, tags...")
-                category = gr.Dropdown(category_options(ADVISORS), value="All", label="Category filter")
-                selected_count = gr.Markdown(f"{len(DEFAULT_SELECTED_IDS)} selected council member(s)")
-                selected_chips = gr.HTML(render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)))
-                advisor_checks = gr.CheckboxGroup(
-                    label="Visible advisors",
-                    choices=_choices(ADVISORS),
-                    value=DEFAULT_SELECTED_IDS,
-                )
-                with gr.Row():
-                    surprise_btn = gr.Button("Surprise Me")
-                    balanced_btn = gr.Button("Balanced Council")
-                with gr.Row():
-                    select_visible_btn = gr.Button("Select All Visible")
-                    clear_btn = gr.Button("Clear Selection")
-                gallery = gr.HTML(render_advisor_gallery(ADVISORS, DEFAULT_SELECTED_IDS))
+        with gr.Row(elem_classes=["app-shell"]):
+            with gr.Column(scale=5, min_width=340):
+                with gr.Group(elem_classes=["panel", "voice-card"]):
+                    gr.HTML(
+                        """
+                        <div class="panel-title">
+                        <h2><span class="number">01</span>Ask by voice</h2>
+                        <span class="badge">Text is still available</span>
+                        </div>
+                        """
+                    )
 
-            with gr.Column(scale=2, min_width=520):
-                gr.Markdown("### Ask The Council")
-                with gr.Row():
-                    input_mode = gr.Radio(["Text", "Voice"], value="Text", label="Input mode")
-                    spoken_language = gr.Dropdown(VOICE_LANGUAGES, value="English", label="Spoken input language")
-                    output_language = gr.Dropdown(TEXT_LANGUAGES, value="English", label="Council reply language")
-                custom_language = gr.Textbox(label="Custom output language", placeholder="Optional, e.g. Brazilian Portuguese")
-                question = gr.Textbox(label="Your question", lines=5, placeholder="What would you like the council to help with?")
-                with gr.Row():
-                    audio = gr.Audio(label="Microphone or uploaded audio", sources=["microphone", "upload"], type="filepath")
+                    with gr.Row():
+                        input_mode = gr.Radio(["Voice", "Text"], value="Voice", label="Input mode")
+                        spoken_language = gr.Dropdown(VOICE_LANGUAGES, value="English", label="Spoken input language")
+                        output_language = gr.Dropdown(TEXT_LANGUAGES, value="English", label="Council reply language")
+
+                    custom_language = gr.Textbox(
+                        label="Custom output language",
+                        placeholder="Optional, e.g. Brazilian Portuguese",
+                    )
+
+                    audio = gr.Audio(
+                        label="Record or upload your question",
+                        sources=["microphone", "upload"],
+                        type="filepath",
+                    )
+
+                    with gr.Row():
+                        transcribe_btn = gr.Button("Transcribe")
+                        use_transcript_btn = gr.Button("Use transcript as question")
+
                     transcript = gr.Textbox(label="Editable transcript", lines=4)
-                with gr.Row():
-                    transcribe_btn = gr.Button("Transcribe audio")
-                    use_transcript_btn = gr.Button("Use transcript as question")
+                    question = gr.Textbox(label="Your question", lines=5, placeholder="What would you like the council to help with?")
 
-                with gr.Row():
-                    mode = gr.Dropdown(
+                with gr.Group(elem_classes=["panel"]):
+                    gr.HTML(
+                        """
+                        <div class="panel-title">
+                        <h2><span class="number">02</span>Build your council</h2>
+                        <span class="badge">Select your advisors</span>
+                        </div>
+                        """
+                    )
+
+                    with gr.Row():
+                        search = gr.Textbox(label="Search advisors", placeholder="Search names, roles, tags...")
+                        category = gr.Dropdown(category_options(ADVISORS), value="All", label="Category")
+
+                    with gr.Row(elem_classes=["actions"]):
+                        balanced_btn = gr.Button("Balanced Council")
+                        surprise_btn = gr.Button("Surprise Me")
+                        select_visible_btn = gr.Button("Select visible")
+                        clear_btn = gr.Button("Clear")
+
+                    selected_count = gr.Markdown(f"{len(DEFAULT_SELECTED_IDS)} selected council member(s)")
+                    selected_chips = gr.HTML(render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)))
+
+                    advisor_checks = gr.CheckboxGroup(
+                        label="Visible advisors",
+                        choices=_choices(ADVISORS),
+                        value=DEFAULT_SELECTED_IDS,
+                    )
+
+                    gallery = gr.HTML(render_advisor_gallery(ADVISORS, DEFAULT_SELECTED_IDS))
+
+                with gr.Group(elem_classes=["panel"]):
+                    gr.HTML(
+                        """
+                        <div class="panel-title">
+                        <h2><span class="number">03</span>Choose the scene</h2>
+                        <span class="badge">Mode and mood</span>
+                        </div>
+                        """
+                    )
+
+                    mode = gr.Radio(
                         ["Mastermind Mode", "Comic Relief Mode", "Council Mode", "Campfire Council Mode"],
                         value="Campfire Council Mode",
                         label="Response mode",
+                        elem_classes=["scene-radio"],
                     )
+
+                    with gr.Row():
+                        mood = gr.Dropdown(
+                            [
+                                "Gentle campfire",
+                                "Philosophical tavern",
+                                "Academic panic room",
+                                "Woodland nonsense",
+                                "Executive board meeting gone weird",
+                                "Cosmic customer support desk",
+                            ],
+                            value="Gentle campfire",
+                            label="Council mood",
+                        )
+
+                        active_count = gr.Dropdown(
+                            [3, 4, 5, 6, 7],
+                            value=5,
+                            label="Active speakers",
+                        )
+
                     strategy = gr.Dropdown(
                         ["Surprise me", "Match to my topic", "Manual selection", "Balanced Council"],
                         value="Balanced Council",
                         label="Speaker selection strategy",
                     )
-                    active_count = gr.Slider(3, 7, value=5, step=1, label="Active speakers")
-                gr.Markdown("You can build a large Mastermind Alliance, but each session invites a smaller circle of active speakers so the council stays lively, fast, and readable.")
-                manual_active = gr.CheckboxGroup(label="Manual active speakers", choices=_choices(_selected_advisors(DEFAULT_SELECTED_IDS)), value=[])
-                with gr.Row():
-                    mood = gr.Dropdown(
-                        [
-                            "Gentle campfire",
-                            "Philosophical tavern",
-                            "Academic panic room",
-                            "Woodland nonsense",
-                            "Executive board meeting gone weird",
-                            "Cosmic customer support desk",
-                        ],
-                        value="Gentle campfire",
-                        label="Council mood",
-                    )
-                    turns = gr.Slider(4, 12, value=6, step=1, label="Dialogue turns")
-                with gr.Row():
-                    humor = gr.Slider(
-                        0,
-                        5,
-                        value=3,
-                        step=1,
-                        label="Comedy level: subtle wit → hilarious kindness",
-                    )
-                    compassion = gr.Slider(0, 5, value=5, step=1, label="Compassion level")
-                with gr.Row():
-                    include_verdict = gr.Checkbox(value=True, label="Include final verdict")
-                    demo_friendly = gr.Checkbox(value=True, label="Demo-friendly mode")
-                    use_model = gr.Checkbox(value=True, label="Use Tiny Aya model")
-                with gr.Accordion("Advanced speech options", open=False):
-                    speak_final = gr.Checkbox(value=False, label="Speak final verdict")
-                    speak_cards = gr.Checkbox(value=False, label="Speak every advisor card")
-                    speak_turns = gr.Checkbox(value=False, label="Speak Campfire Council turns")
-                    gr.Markdown("TTS is optional and disabled by default for deployment reliability.")
-                with gr.Row():
-                    shuffle_btn = gr.Button("Shuffle Active Speakers")
-                    generate_btn = gr.Button("Generate Council", variant="primary")
 
-                status = gr.Markdown("Model mode: template fallback ready")
-                engine_panel = gr.HTML()
-                active_row = gr.HTML()
-                output = gr.HTML()
-                verdict = gr.HTML()
-                with gr.Row():
-                    export_btn = gr.Button("Export Session as Markdown")
-                    export_file = gr.File(label="Session export")
-                export_status = gr.Markdown()
+                    with gr.Row():
+                        humor = gr.Slider(0, 5, value=3, step=1, label="Humor intensity")
+                        compassion = gr.Slider(0, 5, value=5, step=1, label="Compassion level")
+
+                    with gr.Accordion("Advanced options", open=False):
+                        manual_active = gr.CheckboxGroup(
+                            label="Manual active speakers",
+                            choices=_choices(_selected_advisors(DEFAULT_SELECTED_IDS)),
+                            value=[],
+                        )
+                        turns = gr.Slider(4, 12, value=6, step=1, label="Dialogue turns")
+                        include_verdict = gr.Checkbox(value=True, label="Include final verdict")
+                        demo_friendly = gr.Checkbox(value=True, label="Demo-friendly mode")
+                        use_model = gr.Checkbox(value=True, label="Use Tiny Aya model")
+
+                        speak_final = gr.Checkbox(value=False, label="Speak final verdict")
+                        speak_cards = gr.Checkbox(value=False, label="Speak every advisor card")
+                        speak_turns = gr.Checkbox(value=False, label="Speak Campfire Council turns")
+
+                    with gr.Row(elem_classes=["actions"]):
+                        shuffle_btn = gr.Button("Shuffle Speakers")
+                        generate_btn = gr.Button("Generate Council", variant="primary")
+
+            with gr.Column(scale=7, min_width=520):
+                with gr.Group(elem_classes=["panel", "stage"]):
+                    gr.HTML(
+                        """
+                        <div class="panel-title">
+                        <h2><span class="number">04</span>Council Stage</h2>
+                        <span class="badge">Live output</span>
+                        </div>
+                        """
+                    )
+
+                    status = gr.Markdown("Model mode: template fallback ready")
+                    engine_panel = gr.HTML()
+                    active_row = gr.HTML()
+                    output = gr.HTML()
+                    verdict = gr.HTML()
+
+                    with gr.Row(elem_classes=["actions"]):
+                        export_btn = gr.Button("Export Session")
+                        export_file = gr.File(label="Session export")
+
+                    export_status = gr.Markdown()        
 
         gr.HTML(
             """
@@ -434,4 +942,4 @@ with gr.Blocks(css=CSS, title="Council of Chuckles") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(css=CSS)
