@@ -184,13 +184,13 @@ CSS = """
   overflow: visible;
 }
 
-.hero {
-  position: relative;
-  min-height: 460px;
-  overflow: hidden;
-  padding: 34px 0 26px;
+.gradio-container .hero {
+  position: relative !important;
+  min-height: 460px !important;
+  overflow: hidden !important;
+  padding: 34px 0 26px !important;
 }
-.hero::before {
+.gradio-container .hero::before {
   content: "";
   position: absolute;
   right: -70px;
@@ -201,24 +201,26 @@ CSS = """
   background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 44%, var(--ember) 100%);
   transform: rotate(-7deg);
 }
-.hero-grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 410px;
-  gap: 28px;
-  align-items: center;
+.gradio-container .hero-grid {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 520px !important;
+  gap: 28px !important;
+  align-items: center !important;
 }
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .88);
-  font-weight: 950;
-  box-shadow: 4px 4px 0 var(--gold);
+.gradio-container .hero .brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  border: 2px solid var(--ink) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, .88) !important;
+  color: var(--ink) !important;
+  font-size: .95rem !important;
+  font-weight: 950 !important;
+  box-shadow: 4px 4px 0 var(--gold) !important;
 }
 .brand-mark {
   width: 24px;
@@ -237,21 +239,23 @@ CSS = """
   border-radius: 5px;
 }
 .brand-mark::after { inset: 9px; }
-.hero h1 {
-  margin: 26px 0 14px;
-  max-width: 760px;
-  font-size: clamp(4rem, 8.4vw, 7.75rem);
-  line-height: .82;
-  letter-spacing: 0;
-  color: var(--ink);
+.gradio-container .hero h1 {
+  margin: 26px 0 14px !important;
+  max-width: 760px !important;
+  font-size: clamp(4rem, 8.4vw, 7.75rem) !important;
+  line-height: .82 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--ink) !important;
+  font-weight: 950 !important;
 }
-.subtitle {
-  max-width: 650px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 1.22rem;
-  line-height: 1.48;
-  font-weight: 720;
+
+.gradio-container .hero .subtitle {
+  max-width: 650px !important;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 1.22rem !important;
+  line-height: 1.48 !important;
+  font-weight: 720 !important;
 }
 .badges,
 .actions,
@@ -286,6 +290,10 @@ CSS = """
   font-size: .86rem;
   font-weight: 850;
 }
+.gradio-container .hero .badge {
+  color: var(--ink) !important;
+  font-weight: 900 !important;
+}
 .tag {
   background: var(--violet);
   color: #442053;
@@ -307,18 +315,20 @@ CSS = """
 }
 
 /* SVG thinker sticker banner. */
-.hero-art {
-  min-height: 396px;
-  position: relative;
-  isolation: isolate;
-  overflow: visible;
+.gradio-container .hero-art {
+  width: 520px !important;
+  min-height: 396px !important;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: visible !important;
 }
-.hero-art::before {
+
+.gradio-container .hero-art::before {
   content: "";
   position: absolute;
-  right: -14px;
+  right: 0;
   top: 6px;
-  width: 101%;
+  width: 100%;
   height: 366px;
   border-radius: 48% 52% 46% 54% / 54% 46% 54% 46%;
   background:
@@ -359,12 +369,12 @@ CSS = """
   font-weight: 950;
   white-space: nowrap;
 }
-.thinker-sticker.feature { width: 136px; left: 266px; top: 146px; --tilt: 2deg; }
-.thinker-sticker.socrates { width: 100px; left: 138px; top: 28px; --tilt: 6deg; }
-.thinker-sticker.aristotle { width: 92px; left: 244px; top: 18px; --tilt: 8deg; }
-.thinker-sticker.confucius { width: 102px; left: 54px; top: 176px; --tilt: -6deg; }
-.thinker-sticker.rumi { width: 98px; left: 170px; top: 246px; --tilt: -5deg; }
-.thinker-sticker.jung { width: 100px; left: 362px; top: 228px; --tilt: 4deg; }
+.thinker-sticker.feature { width: 136px; left: 300px; top: 146px; --tilt: 2deg; }
+.thinker-sticker.socrates { width: 100px; left: 170px; top: 28px; --tilt: 6deg; }
+.thinker-sticker.aristotle { width: 92px; left: 296px; top: 18px; --tilt: 8deg; }
+.thinker-sticker.confucius { width: 102px; left: 92px; top: 176px; --tilt: -6deg; }
+.thinker-sticker.rumi { width: 98px; left: 214px; top: 246px; --tilt: -5deg; }
+.thinker-sticker.jung { width: 100px; left: 400px; top: 228px; --tilt: 4deg; }
 .thinker-sticker.feature .thinker-label {
   font-size: .82rem;
   margin-top: -14px;
@@ -703,14 +713,18 @@ footer.engine-panel p { color: var(--muted); }
   .app-shell {
     grid-template-columns: 1fr !important;
   }
-  .hero-art { min-height: 318px; }
+  .hero-art {
+  width: 100% !important;
+  min-height: 318px !important;
+  }
   .hero-art::before { right: 0; top: 8px; width: 100%; height: 300px; }
-  .thinker-sticker.feature { width: 122px; left: 64%; top: 116px; }
-  .thinker-sticker.socrates { width: 88px; left: 35%; top: 24px; }
-  .thinker-sticker.aristotle { width: 82px; left: 58%; top: 18px; }
-  .thinker-sticker.confucius { width: 90px; left: 12%; top: 148px; }
-  .thinker-sticker.rumi { width: 86px; left: 42%; top: 210px; }
-  .thinker-sticker.jung { width: 88px; left: 78%; top: 198px; }
+
+  .thinker-sticker.feature { width: 122px; left: 62%; top: 116px; }
+  .thinker-sticker.socrates { width: 88px; left: 33%; top: 24px; }
+  .thinker-sticker.aristotle { width: 82px; left: 55%; top: 18px; }
+  .thinker-sticker.confucius { width: 90px; left: 10%; top: 148px; }
+  .thinker-sticker.rumi { width: 86px; left: 39%; top: 210px; }
+  .thinker-sticker.jung { width: 88px; left: 74%; top: 198px; }
   .stage { position: static !important; max-height: none; }
 }
 
