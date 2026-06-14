@@ -77,6 +77,31 @@ def surprise_selection(category: str):
 def use_transcript(transcript: str):
     return transcript or ""
 
+def toggle_input_mode(input_mode: str):
+    is_voice = input_mode == "Voice"
+
+    if is_voice:
+        input_language_update = gr.update(
+            visible=True,
+            choices=VOICE_LANGUAGES,
+            value="English",
+            label="Spoken input language",
+        )
+    else:
+        input_language_update = gr.update(
+            visible=True,
+            choices=TEXT_LANGUAGES,
+            value="English",
+            label="Typed question language",
+        )
+
+    return (
+        input_language_update,              # input language selector
+        gr.update(visible=is_voice),        # audio
+        gr.update(visible=is_voice),        # transcribe button
+        gr.update(visible=is_voice),        # use transcript button
+        gr.update(visible=is_voice),        # transcript textbox
+    )
 
 def transcribe(audio_path: str | None, spoken_language: str):
     text, status = transcribe_audio(audio_path, spoken_language)
@@ -762,7 +787,12 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                     )
 
                     with gr.Row():
-                        input_mode = gr.Radio(["Voice", "Text"], value="Voice", label="Input mode")
+                        input_mode = gr.Radio(
+                            ["Voice", "Text"],
+                            value="Voice",
+                            label="Input mode",
+                            interactive=True,
+                        )
                         spoken_language = gr.Dropdown(VOICE_LANGUAGES, value="English", label="Spoken input language")
                         output_language = gr.Dropdown(TEXT_LANGUAGES, value="English", label="Council reply language")
 
@@ -775,13 +805,14 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         label="Record or upload your question",
                         sources=["microphone", "upload"],
                         type="filepath",
+                        visible=True,
                     )
 
                     with gr.Row():
-                        transcribe_btn = gr.Button("Transcribe")
-                        use_transcript_btn = gr.Button("Use transcript as question")
+                        transcribe_btn = gr.Button("Transcribe", visible=True)
+                        use_transcript_btn = gr.Button("Use transcript as question", visible=True)
 
-                    transcript = gr.Textbox(label="Editable transcript", lines=4)
+                    transcript = gr.Textbox(label="Editable transcript", lines=4, visible=True)
                     question = gr.Textbox(label="Your question", lines=5, placeholder="What would you like the council to help with?")
 
                 with gr.Group(elem_classes=["panel"]):
@@ -951,6 +982,12 @@ with gr.Blocks(title="Council of Chuckles") as demo:
         surprise_selection,
         [category],
         panel2_outputs,
+    )
+
+    input_mode.change(
+        toggle_input_mode,
+        [input_mode],
+        [spoken_language, audio, transcribe_btn, use_transcript_btn, transcript],
     )
 
     transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
