@@ -20,8 +20,14 @@ tags:
   - gradio
   - small-models
   - tiny-titan
+  - off-brand
+  - best-demo
+  - best-agent
+  - best-use-of-codex
+  - bonus-quest-champion
   - multilingual
   - voice
+  - codex
   - cohere
   - tiny-aya
   - openbmb
@@ -29,7 +35,6 @@ tags:
   - whimsical
   - local-ai
   - zerogpu
-  - off-the-grid
   - council-engine
 ---
 
@@ -226,7 +231,18 @@ I am afraid to submit my paper because it might not be good enough.
 
 ## Badges / Categories Targeted
 
-This app targets Thousand Token Wood, Tiny Titan, Off-Brand Award, Best Demo, Off the Grid, and multilingual / voice-first appeal. These are categories targeted, not awards claimed.
+This app targets the following Build Small track, sponsor prize, and bonus badges. These are categories targeted, not awards claimed.
+
+| Target | Why Council of Chuckles fits |
+| --- | --- |
+| Thousand Token Wood | Whimsical, AI-native council theater built around small-model generation, voice input, and playful advisor personas. |
+| Tiny Titan | The default and optional models listed above are each under 4B parameters, with Tiny Aya Water at 3.35B and Whisper small at 244M. |
+| Off Brand | The app uses a custom illustrated hero, themed panels, advisor chips, and a styled Council Stage instead of stock Gradio presentation. |
+| Best Agent | The Council Engine performs multi-step routing, theme/emotion/need analysis, advisor matching, archetype balancing, speaker planning, and verdict synthesis before generation. |
+| Best Demo | The README includes a 60-90 second demo script designed to show voice input, council assembly, model output, safety/fallback behavior, and export. Final eligibility depends on adding the recorded demo and social post links. |
+| Best Use of Codex | The project was developed with OpenAI Codex, and the connected GitHub/Space history includes Codex-authored work. |
+| Bonus Quest Champion | The build intentionally combines several target criteria: tiny models, custom UI, agentic planning, demo readiness, Codex use, ZeroGPU deployment, and a whimsical track fit. |
+| Judges' Wildcard | No special entry is required; the field guide says every submission is automatically in the running. |
 
 ## Data File Format
 

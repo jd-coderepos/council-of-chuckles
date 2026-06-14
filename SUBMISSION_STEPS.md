@@ -187,6 +187,7 @@ Before submitting, make sure `README.md` has:
 
 - Build Small tags in the YAML block
 - `thousand-token-wood`
+- targeted badge tags: `tiny-titan`, `off-brand`, `best-demo`, `best-agent`, `best-use-of-codex`, and `bonus-quest-champion`
 - model names and parameter counts
 - GitHub repo link
 - live Space link
@@ -207,6 +208,6 @@ Use this as the final audit before you submit:
 | REQ-03: record a demo | Demo script is in `README.md` | Record and link the final video |
 | REQ-04: post it | `README.md` has a Social post placeholder | Publish the social post and replace the placeholder |
 | REQ-05: mind the ZeroGPU limit | This is one ZeroGPU-targeted app | Keep your total ZeroGPU submissions at 10 or fewer |
-| REQ-06: tag your README | YAML tags include `build-small`, `thousand-token-wood`, `gradio`, and `zerogpu` | Add/remove badge tags only if you intentionally target them |
+| REQ-06: tag your README | YAML tags include `build-small`, `thousand-token-wood`, `gradio`, `zerogpu`, `tiny-titan`, `off-brand`, `best-demo`, `best-agent`, `best-use-of-codex`, and `bonus-quest-champion` | Keep badge claims aligned with the final demo, README, and social post |
 
 For the OpenAI sponsor prize, keep the GitHub repo or Space connected to commits authored by `OpenAI Codex <codex@openai.com>`.

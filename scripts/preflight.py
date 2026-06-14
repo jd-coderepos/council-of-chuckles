@@ -17,6 +17,14 @@ REQUIRED_FILES = [
     "utils/audio.py",
 ]
 REQUIRED_TAGS = {"build-small", "thousand-token-wood", "gradio", "zerogpu"}
+TARGET_BADGE_TAGS = {
+    "tiny-titan",
+    "off-brand",
+    "best-demo",
+    "best-agent",
+    "best-use-of-codex",
+    "bonus-quest-champion",
+}
 SUBMISSION_LINK_LABELS = ["Live Space", "GitHub repo", "Demo video", "Social post"]
 
 
@@ -56,6 +64,9 @@ def check_readme_front_matter() -> None:
     missing_tags = sorted(REQUIRED_TAGS - tags)
     if missing_tags:
         fail(f"README.md missing tags: {', '.join(missing_tags)}")
+    missing_badge_tags = sorted(TARGET_BADGE_TAGS - tags)
+    if missing_badge_tags:
+        warn(f"README.md missing targeted badge tags: {', '.join(missing_badge_tags)}")
     ok("README.md front matter has required Space metadata and tags")
 
 
