@@ -33,6 +33,44 @@ MAX_TOKENS = {
 
 VERDICT_TOKENS = 280
 
+
+def _render_generated_dialogue(
+    generated: str,
+    active_speakers: list[dict],
+    reasons: dict[str, str],
+) -> str:
+    advisor_by_name = {advisor["name"].casefold(): advisor for advisor in active_speakers}
+    cards = []
+
+    for raw_line in generated.splitlines():
+        line = raw_line.strip()
+        if not line or ":" not in line:
+            continue
+
+        speaker_name, body = line.split(":", 1)
+        speaker_name = speaker_name.strip().strip("*")
+        body = body.strip()
+        if not speaker_name or not body:
+            continue
+
+        advisor = advisor_by_name.get(speaker_name.casefold())
+        if not advisor:
+            advisor = next(
+                (
+                    candidate
+                    for name, candidate in advisor_by_name.items()
+                    if speaker_name.casefold() in name or name in speaker_name.casefold()
+                ),
+                None,
+            )
+        if not advisor:
+            continue
+
+        cards.append(render_dialogue_turn(advisor, body, "respond", reasons.get(advisor["id"], "matched")))
+
+    return "".join(cards)
+
+
 def make_final_verdict(
     topic: str,
     analysis: dict,
@@ -172,7 +210,10 @@ def run_council(
             )
             status_bits.append(model_status)
         if generated:
-            output_html = render_verdict(disclaimer + ("\n\n" if disclaimer else "") + generated)
+            rendered_dialogue = _render_generated_dialogue(generated, active_speakers, reasons)
+            output_html = (render_verdict(disclaimer) if disclaimer else "") + (
+                rendered_dialogue or render_verdict(generated)
+            )
             plain_output = generated
         else:
             output_html = "".join(

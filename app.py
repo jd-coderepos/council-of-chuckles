@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import random
 
 import gradio as gr
@@ -155,18 +156,22 @@ def generate(
         },
     )
     return (
-        result["engine_html"],
-        result["active_html"],
-        result["output_html"],
-        result["verdict_html"],
-        result["status"],
+        render_stage_display(
+            result.get("engine_html", ""),
+            result.get("active_html", ""),
+            result.get("output_html", ""),
+            result.get("verdict_html", ""),
+            result.get("status", ""),
+        ),
         session,
     )
 
 
 def export_session(session: list[dict] | None):
     path = export_session_markdown(session)
-    return path, "Session exported." if path else "Nothing to export yet."
+    if path:
+        return gr.update(value=path, visible=True), "Session exported."
+    return gr.update(value=None, visible=False), "Nothing to export yet."
 
 
 CSS = """
@@ -451,10 +456,14 @@ CSS = """
   min-width: 0 !important;
 }
 
-.right-rail {
+.left-rail {
   position: sticky !important;
   top: 14px !important;
-  z-index: 3 !important;
+  z-index: 2 !important;
+}
+
+.right-rail {
+  position: static !important;
 }
 
 .stage {
@@ -463,19 +472,51 @@ CSS = """
     radial-gradient(circle at 94% 10%, rgba(255, 176, 0, .2), transparent 10rem),
     linear-gradient(150deg, #2b163b, #1b1024) !important;
   color: #fff7ea !important;
-  border-color: rgba(37, 18, 53, .7) !important;
-  max-height: calc(100vh - 28px);
-  overflow: auto !important;
+  border-color: rgba(37, 18, 53, .72) !important;
+  box-shadow: 0 18px 44px rgba(37, 18, 53, .24) !important;
+  overflow: visible !important;
 }
 .stage .badge,
 .stage .chip {
-  background: rgba(255,255,255,.12);
-  color: #fff7ea;
-  border-color: rgba(255,247,234,.26);
+  background: rgba(255,255,255,.12) !important;
+  color: #fff7ea !important;
+  border-color: rgba(255,247,234,.26) !important;
 }
 .stage .muted { color: #f0d9bd; }
 .stage .avatar-fallback,
 .stage .avatar-img { color: var(--ink); }
+
+.stage-display,
+.stage-display > div,
+.stage-display-inner {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.stage-display-inner {
+  display: block;
+}
+
+.stage-status-line {
+  color: #f0d9bd;
+  font-size: .78rem;
+  margin: 2px 0 12px;
+  opacity: .78;
+}
+
+.stage-actions {
+  justify-content: flex-start !important;
+  margin-top: 14px !important;
+}
+
+.stage-actions button {
+  width: auto !important;
+  min-width: 150px !important;
+  flex: 0 0 auto !important;
+}
+
 .panel-title {
   display: flex;
   align-items: center;
@@ -665,27 +706,51 @@ CSS = """
   min-width: 28px;
 }
 
+.stage-status {
+  margin: 6px 0 10px !important;
+  color: #f0d9bd !important;
+  font-size: .82rem !important;
+}
+
+.stage-status p {
+  margin: 0 !important;
+}
+
+.stage-placeholder {
+  margin-top: 12px !important;
+}
+
+.stage-placeholder p {
+  margin-bottom: 0 !important;
+}
+
+.stage-actions {
+  margin-top: 14px !important;
+}
+
 /* Stage output. Keep compatibility with old renderer class names. */
 .engine-panel,
 .response-card,
 .verdict-card,
 .dialogue-turn .bubble {
   border-radius: 8px;
-  padding: 13px;
+  padding: 14px;
   margin: 12px 0;
 }
 .engine-panel {
-  border: 1px solid rgba(255,247,234,.22);
-  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,247,234,.28);
+  background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,176,0,.08));
+  color: #fff7ea;
 }
-.engine-panel h3,
-.response-card h3 {
+.engine-panel h3 {
   margin: 0 0 6px;
   color: #fff7ea;
 }
 .engine-panel p {
   color: #f0d9bd;
-  margin: .3rem 0 .8rem;
+  margin: .35rem 0 0;
+  font-weight: 760;
+  line-height: 1.5;
 }
 .engine-grid {
   display: grid;
@@ -693,7 +758,36 @@ CSS = """
   gap: .8rem;
   margin-bottom: .8rem;
 }
-.engine-strategy { color: #fff7ea; margin-bottom: .55rem; }
+.engine-strategy {
+  color: #fff7ea;
+  margin: .7rem 0 .55rem;
+}
+.engine-grid b {
+  color: #fff7ea;
+}
+.stage .tag {
+  background: rgba(255, 247, 234, .14);
+  color: #fff7ea;
+  border-color: rgba(255, 247, 234, .2);
+}
+.stage .tag.warm {
+  background: rgba(255, 176, 0, .2);
+  color: #fff4d8;
+}
+.stage .trigger-chip {
+  background: rgba(255,247,234,.13);
+  color: #fff7ea;
+  border-color: rgba(255,247,234,.24);
+}
+.stage .trigger-chip em {
+  color: #f0d9bd;
+}
+.speakers {
+  margin: 8px 0 6px;
+}
+.stage .speakers + * {
+  margin-top: 12px;
+}
 .response-card {
   background: #fff7ea;
   color: var(--ink);
@@ -719,10 +813,17 @@ CSS = """
   align-items: start;
   margin-top: 12px;
 }
+.dialogue-turn > .avatar-fallback,
+.dialogue-turn > .avatar-img {
+  margin-top: 4px;
+}
 .dialogue-turn .bubble {
   background: #fff7ea;
   color: var(--ink);
   border: 1px solid #ffd89b;
+}
+.dialogue-turn .bubble b {
+  color: var(--ink);
 }
 .dialogue-turn .bubble span {
   display: block;
@@ -743,9 +844,17 @@ CSS = """
   padding: 14px;
   margin-top: 14px;
 }
+.takeaway strong,
+.takeaway .response-body,
+.takeaway p,
+.verdict-card strong,
+.verdict-card .response-body,
+.verdict-card p {
+  color: var(--ink);
+}
 .empty {
-  color: var(--muted);
-  padding: .7rem;
+  color: #f0d9bd;
+  padding: .7rem 0;
 }
 footer.engine-panel {
   margin: 0 0 40px;
@@ -775,6 +884,7 @@ footer.engine-panel p { color: var(--muted); }
   .thinker-sticker.confucius { width: 90px; left: 10%; top: 148px; }
   .thinker-sticker.rumi { width: 86px; left: 39%; top: 210px; }
   .thinker-sticker.jung { width: 88px; left: 74%; top: 198px; }
+  .left-rail,
   .right-rail {
     position: static !important;
   }
@@ -795,7 +905,38 @@ footer.engine-panel p { color: var(--muted); }
   .gradio-container button.primary { width: 100%; min-width: 0; }
 }
 """
+STAGE_PLACEHOLDER_HTML = """
+<section class="engine-panel stage-placeholder">
+  <h3>Council Engine</h3>
+  <p class="muted">
+    Ask a question, build your council, then generate the session.
+    The active speakers and council responses will appear here.
+  </p>
+</section>
+"""
 
+def render_stage_display(
+    engine_html: str = "",
+    active_html: str = "",
+    output_html: str = "",
+    verdict_html: str = "",
+    status_text: str = "",
+) -> str:
+    status_html = (
+        f'<div class="stage-status-line">Model status: {html.escape(status_text)}</div>'
+        if status_text
+        else ""
+    )
+
+    body = "".join(
+        part for part in [status_html, engine_html, active_html, output_html, verdict_html]
+        if part
+    )
+
+    if not body:
+        body = STAGE_PLACEHOLDER_HTML
+
+    return f'<div class="stage-display-inner">{body}</div>'
 
 with gr.Blocks(title="Council of Chuckles") as demo:
     selected_state = gr.State(DEFAULT_SELECTED_IDS)
@@ -967,17 +1108,16 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         """
                     )
 
-                    status = gr.Markdown("Model mode: template fallback ready")
-                    engine_panel = gr.HTML()
-                    active_row = gr.HTML()
-                    output = gr.HTML()
-                    verdict = gr.HTML()
+                    stage_display = gr.HTML(
+                        render_stage_display(),
+                        elem_classes=["stage-display"],
+                    )
 
-                    with gr.Row(elem_classes=["actions"]):
-                        export_btn = gr.Button("Export Session")
-                        export_file = gr.File(label="Session export")
+                    with gr.Row(elem_classes=["actions", "stage-actions"]):
+                        export_btn = gr.Button("Export Session", scale=0, min_width=150)
+                        export_file = gr.File(label="Session export", visible=False)
 
-                    export_status = gr.Markdown()        
+                    export_status = gr.Markdown("", elem_classes=["stage-status"])
 
         gr.HTML(
             """
@@ -1049,7 +1189,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             use_model,
             session_state,
         ],
-        [engine_panel, active_row, output, verdict, status, session_state],
+        [stage_display, session_state],
     )
     export_btn.click(export_session, [session_state], [export_file, export_status])
 

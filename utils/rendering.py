@@ -105,31 +105,27 @@ def render_active_speaker_row(advisors: list[dict]) -> str:
         f'<span class="chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}</span></span>'
         for advisor in advisors
     )
-    return f'<div><h3>Active speakers</h3><div class="speakers">{chips}</div></div>'
+    return f'<section class="active-speakers"><h3>Active speakers</h3><div class="speakers">{chips}</div></section>'
 
 
 def render_engine_panel(analysis: dict, active_speakers: list[dict], strategy: str, reasons: dict[str, str]) -> str:
-    themes = "".join(f'<span class="tag">{_escape(item)}</span>' for item in analysis.get("themes", []))
-    emotions = "".join(f'<span class="tag">{_escape(item)}</span>' for item in analysis.get("emotions", []))
-    needs = "".join(f'<span class="tag">{_escape(item)}</span>' for item in analysis.get("needs", []))
     archetypes = sorted({a for advisor in active_speakers for a in advisor.get("archetypes", [])})
-    arch = "".join(f'<span class="tag warm">{_escape(item)}</span>' for item in archetypes)
-    triggered = "".join(
-        f'<span class="trigger-chip">{render_avatar(advisor)}<span>{_escape(advisor["name"])}<em>{_escape(reasons.get(advisor["id"], "matched"))}</em></span></span>'
-        for advisor in active_speakers
+    themes = ", ".join(analysis.get("themes", [])[:3]) or "the question"
+    emotions = ", ".join(analysis.get("emotions", [])[:2]) or "the mood"
+    needs = ", ".join(analysis.get("needs", [])[:2]) or "a useful next step"
+    voice_mix = ", ".join(archetypes[:3]) if archetypes else "balanced"
+    names = ", ".join(advisor["name"] for advisor in active_speakers[:4])
+    if len(active_speakers) > 4:
+        names += f", and {len(active_speakers) - 4} more"
+
+    summary = (
+        f"Detected {themes}, {emotions}, and the need for {needs}. "
+        f"{_escape(strategy)} selected {voice_mix} voices: {names}."
     )
     return f"""
     <section class="engine-panel">
       <h3>Council Engine</h3>
-      <p>The model writes the lines, but the Council Engine directs the scene: it detects the topic, activates matching advisors, balances archetypes, plans the turn order, and keeps the conversation useful.</p>
-      <div class="engine-grid">
-        <div><b>Detected themes</b><div>{themes}</div></div>
-        <div><b>Detected emotions</b><div>{emotions}</div></div>
-        <div><b>Detected needs</b><div>{needs}</div></div>
-        <div><b>Active archetypes</b><div>{arch}</div></div>
-      </div>
-      <div class="engine-strategy"><b>Speaker selection strategy:</b> {_escape(strategy)}</div>
-      <div class="triggered">{triggered}</div>
+      <p>{_escape(summary)}</p>
     </section>
     """
 
@@ -172,4 +168,3 @@ def _format_text(text: str) -> str:
     safe = _escape(text)
     safe = safe.replace("\n", "<br>")
     return safe
-

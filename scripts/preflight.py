@@ -104,9 +104,15 @@ def check_app_fallback() -> None:
         False,
         [],
     )
-    status = result[4]
-    output_html = result[2]
-    verdict_html = result[3]
+    if len(result) == 2:
+        stage_html = result[0]
+        status = stage_html
+        output_html = stage_html
+        verdict_html = stage_html
+    else:
+        status = result[4]
+        output_html = result[2]
+        verdict_html = result[3]
     if len(app.ADVISORS) < 50:
         fail("Expected the advisor dataset to load")
     if "Fallback mode active" not in status:
