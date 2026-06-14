@@ -23,6 +23,7 @@ except Exception:
 
 
 ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "CohereLabs/cohere-transcribe-03-2026")
+ASR_FALLBACK_MODEL_ID = os.getenv("ASR_FALLBACK_MODEL_ID", "openai/whisper-tiny")
 TTS_MODEL_ID = os.getenv("TTS_MODEL_ID", "openbmb/VoxCPM2")
 ENABLE_VOICE_INPUT = os.getenv("ENABLE_VOICE_INPUT", "true").lower() == "true"
 ENABLE_TTS = os.getenv("ENABLE_TTS", "false").lower() == "true"
@@ -71,6 +72,63 @@ def _load_asr_model():
     return processor, model, torch
 
 
+@lru_cache(maxsize=1)
+def _load_fallback_asr_pipeline():
+    import torch
+    from transformers import pipeline
+
+    kwargs = {"model": ASR_FALLBACK_MODEL_ID}
+    if torch.cuda.is_available():
+        kwargs["device"] = 0
+        kwargs["torch_dtype"] = torch.float16
+
+    return pipeline("automatic-speech-recognition", **kwargs)
+
+
+def _prepare_audio(audio_path: str):
+    import numpy as np
+    from transformers.audio_utils import load_audio
+
+    audio = np.asarray(load_audio(audio_path, sampling_rate=16000), dtype=np.float32)
+    audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
+
+    if audio.ndim > 1:
+        audio = audio.mean(axis=-1)
+
+    if audio.size == 0:
+        return None, "I could not find any audio in that recording. Please try again.", 0.0, 0.0
+
+    duration_s = audio.size / 16000
+    peak = float(np.max(np.abs(audio))) if audio.size else 0.0
+    if duration_s < 0.25 or peak < 1e-5:
+        return None, "I could not catch enough speech there. Please try a slightly longer recording.", duration_s, peak
+
+    if peak > 1.0:
+        audio = audio / peak
+
+    return audio, "", duration_s, peak
+
+
+def _decode_text(decoded) -> str:
+    if isinstance(decoded, list):
+        decoded = decoded[0] if decoded else ""
+    if isinstance(decoded, dict):
+        decoded = decoded.get("text", "")
+    return (decoded or "").strip()
+
+
+def _transcribe_with_fallback(audio, language_code: str) -> tuple[str, str]:
+    pipe = _load_fallback_asr_pipeline()
+    result = pipe(
+        {"array": audio, "sampling_rate": 16000},
+        generate_kwargs={"language": language_code, "task": "transcribe"},
+    )
+    text = _decode_text(result)
+    if not text:
+        return "", ASR_FALLBACK_MESSAGE
+    return text, f"Voice mode: Whisper fallback ({ASR_FALLBACK_MODEL_ID}, language={language_code})"
+
+
 @spaces.GPU(duration=60)
 def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str, str]:
     if not audio_path:
@@ -80,32 +138,16 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
         return "", "Voice input is currently disabled. Please type your question instead."
 
     try:
-        import numpy as np
-        from transformers.audio_utils import load_audio
-
         language_code = LANGUAGE_TO_CODE.get(spoken_language, "en")
 
         print(f"[ASR] audio_path={audio_path}")
         print(f"[ASR] spoken_language={spoken_language} -> language_code={language_code}")
 
+        audio, audio_error, duration_s, peak = _prepare_audio(audio_path)
+        if audio_error:
+            return "", audio_error
+
         processor, model, torch = _load_asr_model()
-
-        audio = np.asarray(load_audio(audio_path, sampling_rate=16000), dtype=np.float32)
-        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
-
-        if audio.ndim > 1:
-            audio = audio.mean(axis=-1)
-
-        if audio.size == 0:
-            return "", "I could not find any audio in that recording. Please try again."
-
-        duration_s = audio.size / 16000
-        peak = float(np.max(np.abs(audio))) if audio.size else 0.0
-        if duration_s < 0.25 or peak < 1e-5:
-            return "", "I could not catch enough speech there. Please try a slightly longer recording."
-
-        if peak > 1.0:
-            audio = audio / peak
 
         inputs = processor(
             audio=audio,
@@ -116,15 +158,18 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
 
         audio_chunk_index = inputs.get("audio_chunk_index")
 
-        # Keep Cohere's processor payload intact; generate() uses fields such
-        # as "length" to route short and chunked audio correctly.
         inputs.to(model.device, dtype=model.dtype)
+        generation_inputs = {key: value for key, value in inputs.items() if key != "length"}
 
         print(f"[ASR] processor keys={list(inputs.keys())}")
+        for key, value in generation_inputs.items():
+            shape = getattr(value, "shape", None)
+            dtype = getattr(value, "dtype", None)
+            print(f"[ASR] {key} shape={shape}, dtype={dtype}")
         print(f"[ASR] duration_s={duration_s:.2f}, peak={peak:.4f}")
 
         with torch.inference_mode():
-            outputs = model.generate(**inputs, max_new_tokens=256)
+            outputs = model.generate(**generation_inputs, max_new_tokens=256)
 
         decode_kwargs = {"skip_special_tokens": True}
         if audio_chunk_index is not None:
@@ -132,13 +177,7 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
             decode_kwargs["language"] = language_code
 
         decoded = processor.decode(outputs, **decode_kwargs)
-
-        if isinstance(decoded, list):
-            text = decoded[0] if decoded else ""
-        else:
-            text = decoded
-
-        text = (text or "").strip()
+        text = _decode_text(decoded)
 
         if not text:
             return "", (
@@ -151,7 +190,17 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
     except Exception as exc:
         print("[ASR ERROR]")
         traceback.print_exc()
-        return "", ASR_FALLBACK_MESSAGE
+        try:
+            if "audio" not in locals() or audio is None:
+                audio, audio_error, _, _ = _prepare_audio(audio_path)
+                if audio_error:
+                    return "", audio_error
+            print(f"[ASR] trying fallback model={ASR_FALLBACK_MODEL_ID}")
+            return _transcribe_with_fallback(audio, LANGUAGE_TO_CODE.get(spoken_language, "en"))
+        except Exception:
+            print("[ASR FALLBACK ERROR]")
+            traceback.print_exc()
+            return "", ASR_FALLBACK_MESSAGE
 
 
 def synthesize_speech(text: str, language: str) -> tuple[str | None, str]:
