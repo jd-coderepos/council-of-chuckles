@@ -130,22 +130,44 @@ def generate(
 ):
     output_language = resolve_output_language(output_language_choice, custom_output_language)
     selected = _selected_advisors(selected_ids)
-    result = run_council(
-        topic=question,
-        selected_advisors=selected,
-        output_language=output_language,
-        mode=mode,
-        strategy=strategy,
-        active_count=active_count,
-        manual_ids=manual_ids,
-        mood=mood,
-        turns=turns,
-        humor_intensity=humor,
-        compassion_level=compassion,
-        include_verdict=include_verdict,
-        demo_friendly=demo_friendly,
-        use_model=use_model,
-    )
+    try:
+        result = run_council(
+            topic=question,
+            selected_advisors=selected,
+            output_language=output_language,
+            mode=mode,
+            strategy=strategy,
+            active_count=active_count,
+            manual_ids=manual_ids,
+            mood=mood,
+            turns=turns,
+            humor_intensity=humor,
+            compassion_level=compassion,
+            include_verdict=include_verdict,
+            demo_friendly=demo_friendly,
+            use_model=use_model,
+        )
+    except Exception as exc:
+        message = str(exc).lower()
+        if "zerogpu" in message or "quota" in message:
+            status = "Fallback mode active: ZeroGPU quota unavailable"
+            body = (
+                "The hosted GPU quota is cooling down, so the council is using its "
+                "built-in fallback script for this turn."
+            )
+        else:
+            status = f"Fallback mode active: {exc.__class__.__name__}"
+            body = "The council hit a runtime snag, so the fallback stage is staying readable."
+        result = {
+            "engine_html": "",
+            "active_html": "",
+            "output_html": f'<article class="takeaway"><strong>Tiny Gavel</strong><p>{html.escape(body)}</p></article>',
+            "verdict_html": "",
+            "status": status,
+            "plain_output": body,
+            "analysis": {},
+            "active_speakers": [],
+        }
     session = append_session_entry(
         session,
         {
@@ -457,13 +479,13 @@ CSS = """
 }
 
 .left-rail {
-  position: sticky !important;
-  top: 14px !important;
-  z-index: 2 !important;
+  position: static !important;
 }
 
 .right-rail {
-  position: static !important;
+  position: sticky !important;
+  top: 14px !important;
+  z-index: 2 !important;
 }
 
 .stage {
@@ -486,6 +508,16 @@ CSS = """
 .stage .avatar-fallback,
 .stage .avatar-img { color: var(--ink); }
 
+.stage > div,
+.stage .form,
+.stage .block,
+.stage .padded,
+.stage .contain,
+.stage .html-container,
+.stage .prose,
+.stage .gradio-html,
+.stage [data-testid="HTML"],
+.stage [data-testid="markdown"],
 .stage-display,
 .stage-display > div,
 .stage-display-inner {
@@ -493,6 +525,17 @@ CSS = """
   border: 0 !important;
   box-shadow: none !important;
   padding: 0 !important;
+  color: inherit !important;
+  max-width: none !important;
+}
+
+.stage .panel-title {
+  margin-bottom: 14px !important;
+}
+
+.stage .panel-title h2,
+.stage .panel-title h2 span:not(.number) {
+  color: #fff7ea !important;
 }
 
 .stage-display-inner {

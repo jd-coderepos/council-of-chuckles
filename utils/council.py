@@ -71,6 +71,17 @@ def _render_generated_dialogue(
     return "".join(cards)
 
 
+def _generate_text_or_fallback(*args, **kwargs) -> tuple[str, str]:
+    """Call the ZeroGPU text model without letting quota errors reach Gradio."""
+    try:
+        return generate_text(*args, **kwargs)
+    except Exception as exc:
+        message = str(exc).lower()
+        if "zerogpu" in message or "quota" in message:
+            return "", "Fallback mode active: ZeroGPU quota unavailable"
+        return "", f"Fallback mode active: {exc.__class__.__name__}"
+
+
 def make_final_verdict(
     topic: str,
     analysis: dict,
@@ -97,7 +108,7 @@ def make_final_verdict(
             humor_intensity=humor_intensity,
             compassion_level=compassion_level,
         )
-        generated, model_status = generate_text(
+        generated, model_status = _generate_text_or_fallback(
             prompt,
             max_new_tokens=VERDICT_TOKENS,
             temperature=0.5,
@@ -182,6 +193,8 @@ def run_council(
     engine_html = render_engine_panel(analysis, active_speakers, strategy, reasons)
     active_html = render_active_speaker_row(active_speakers)
     status_bits = []
+    model_calls_used = 0
+    max_model_calls = 1 if use_model else 0
     disclaimer = professional_disclaimer(output_language) if detect_professional_advice(topic) else ""
 
     if not active_speakers:
@@ -199,10 +212,11 @@ def run_council(
     if mode == "Campfire Council Mode":
         plan, fallback_turns = campfire_lines(active_speakers, topic, analysis, turns, mood, output_language)
         generated = ""
-        if use_model:
+        if model_calls_used < max_model_calls:
             prompt = campfire_prompt(topic, output_language, humor_intensity, compassion_level, analysis, active_speakers, plan)
             dialogue_temperature = min(0.9, 0.65 + 0.05 * int(humor_intensity or 0))
-            generated, model_status = generate_text(
+            model_calls_used += 1
+            generated, model_status = _generate_text_or_fallback(
                 prompt,
                 MAX_TOKENS[mode],
                 temperature=dialogue_temperature,
@@ -229,7 +243,7 @@ def run_council(
             active_speakers,
             output_language,
             include_verdict,
-            use_model,
+            use_model and model_calls_used < max_model_calls,
             status_bits,
             council_discussion=plain_output,
             humor_intensity=humor_intensity,
@@ -251,9 +265,10 @@ def run_council(
         plain_parts = []
         for advisor in active_speakers:
             generated = ""
-            if use_model:
+            if model_calls_used < max_model_calls:
                 prompt = advisor_prompt(topic, output_language, mode, humor_intensity, compassion_level, analysis, advisor)
-                generated, model_status = generate_text(prompt, MAX_TOKENS[mode])
+                model_calls_used += 1
+                generated, model_status = _generate_text_or_fallback(prompt, MAX_TOKENS[mode])
                 status_bits.append(model_status)
             body = generated or advisor_card_text(advisor, topic, analysis, mode, output_language)
             cards.append(render_advisor_response(advisor, body, reasons[advisor["id"]]))
@@ -265,7 +280,7 @@ def run_council(
             active_speakers,
             output_language,
             include_verdict,
-            use_model,
+            use_model and model_calls_used < max_model_calls,
             status_bits,
             council_discussion=council_discussion,
             humor_intensity=humor_intensity,
@@ -283,9 +298,10 @@ def run_council(
         }
 
     generated = ""
-    if use_model:
+    if model_calls_used < max_model_calls:
         prompt = council_prompt(topic, output_language, mode, humor_intensity, compassion_level, analysis, active_speakers)
-        generated, model_status = generate_text(prompt, MAX_TOKENS["Council Mode"])
+        model_calls_used += 1
+        generated, model_status = _generate_text_or_fallback(prompt, MAX_TOKENS["Council Mode"])
         status_bits.append(model_status)
     if generated:
         output_html = render_verdict((disclaimer + "\n\n" if disclaimer else "") + generated)
@@ -307,7 +323,7 @@ def run_council(
         active_speakers,
         output_language,
         include_verdict,
-        use_model,
+        use_model and model_calls_used < max_model_calls,
         status_bits,
         council_discussion=plain,
         humor_intensity=humor_intensity,

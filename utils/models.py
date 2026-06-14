@@ -192,7 +192,7 @@ def load_text_model(model_id: str = TEXT_MODEL_ID):
     return tokenizer, model
 
 
-@spaces.GPU(duration=120)
+@spaces.GPU(duration=60)
 def generate_text(
     prompt: str,
     max_new_tokens: int = 280,
