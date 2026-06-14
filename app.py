@@ -101,6 +101,7 @@ def toggle_input_mode(input_mode: str):
         gr.update(visible=is_voice),        # transcribe button
         gr.update(visible=is_voice),        # use transcript button
         gr.update(visible=is_voice),        # transcript textbox
+        gr.update(visible=is_voice, value=""),  # voice status
     )
 
 def transcribe(audio_path: str | None, spoken_language: str):
@@ -441,8 +442,8 @@ CSS = """
 }
 .panel + .panel { margin-top: 16px; }
 .voice-card {
-  border: 2px solid var(--orange) !important;
-  background: linear-gradient(135deg, #fff9e9, #fff) !important;
+  border: 1px solid var(--line) !important;
+  background: rgba(255, 255, 255, .94) !important;
 }
 .stage {
   position: sticky !important;
@@ -513,6 +514,17 @@ CSS = """
 .gradio-container .scene-radio label:has(input[type="radio"]:checked) {
   border-color: var(--orange) !important;
   background: #fff1d0 !important;
+}
+
+.voice-status {
+  min-height: 0 !important;
+  margin: 4px 0 8px !important;
+  color: var(--muted) !important;
+  font-size: .82rem !important;
+}
+
+.voice-status p {
+  margin: 0 !important;
 }
 
 /* Gradio form controls. */
@@ -813,7 +825,14 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         use_transcript_btn = gr.Button("Use transcript as question", visible=True)
 
                     transcript = gr.Textbox(label="Editable transcript", lines=4, visible=True)
-                    question = gr.Textbox(label="Your question", lines=5, placeholder="What would you like the council to help with?")
+
+                    voice_status = gr.Markdown("", elem_classes=["voice-status"], visible=True)
+
+                    question = gr.Textbox(
+                        label="Your question",
+                        lines=5,
+                        placeholder="What would you like the council to help with?",
+                    )
 
                 with gr.Group(elem_classes=["panel"]):
                     gr.HTML(
@@ -987,10 +1006,10 @@ with gr.Blocks(title="Council of Chuckles") as demo:
     input_mode.change(
         toggle_input_mode,
         [input_mode],
-        [spoken_language, audio, transcribe_btn, use_transcript_btn, transcript],
+        [spoken_language, audio, transcribe_btn, use_transcript_btn, transcript, voice_status],
     )
 
-    transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
+    transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, voice_status])
     use_transcript_btn.click(use_transcript, [transcript], [question])
     generate_btn.click(
         generate,
