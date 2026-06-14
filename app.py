@@ -843,8 +843,8 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         active_count = gr.Dropdown(
                             [1, 2, 3, 4, 5],
                             value=3,
-                            label="Voices in this response",
-                            info="How many selected advisors should speak.",
+                            label="Maximum voices in this response",
+                            info="If fewer advisors are selected, all selected advisors can speak.",
                         )
 
                     strategy = gr.Dropdown(
@@ -854,7 +854,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         ],
                         value="Match to my topic",
                         label="Speaker picker",
-                        info="Used when your council has more members than the number of voices above.",
+                        info="Used when your council has more advisors than the maximum voices above.",
                     )
 
                     with gr.Row():
