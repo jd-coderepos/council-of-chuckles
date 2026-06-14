@@ -67,7 +67,7 @@ def _load_asr_model():
     return processor, model, torch
 
 
-@spaces.GPU(duration=120)
+@spaces.GPU(duration=60)
 def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str, str]:
     if not audio_path:
         return "", "No audio provided."
