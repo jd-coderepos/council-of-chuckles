@@ -10,7 +10,7 @@ from utils.audio import transcribe_audio
 from utils.council import run_council
 from utils.languages import TEXT_LANGUAGES, VOICE_LANGUAGES, resolve_output_language
 from utils.matching import select_active_speakers
-from utils.rendering import render_advisor_gallery, render_selected_council_chips
+from utils.rendering import render_advisor_gallery
 from utils.session import append_session_entry, export_session_markdown
 from utils.analyzer import analyze_user_topic
 
@@ -27,85 +27,64 @@ def _selected_advisors(selected_ids: list[str] | None) -> list[dict]:
     ids = selected_ids or []
     return [advisor for advisor in (advisor_by_id(ADVISORS, advisor_id) for advisor_id in ids) if advisor]
 
+def _category_pool(category: str) -> list[dict]:
+    return filter_advisors(ADVISORS, "", category)
 
-def _visible(search: str, category: str) -> list[dict]:
-    return filter_advisors(ADVISORS, search, category)
+
+def _available_advisors(selected_ids: list[str] | None, category: str) -> list[dict]:
+    selected = set(selected_ids or [])
+    return [advisor for advisor in _category_pool(category) if advisor["id"] not in selected]
 
 
-def refresh_filtered_controls(search: str, category: str, selected_ids: list[str] | None):
-    visible = _visible(search, category)
+def refresh_panel2(selected_ids: list[str] | None, category: str):
     selected_ids = selected_ids or []
-    visible_ids = {advisor["id"] for advisor in visible}
-    visible_selected = [advisor_id for advisor_id in selected_ids if advisor_id in visible_ids]
     selected = _selected_advisors(selected_ids)
-    gallery = render_advisor_gallery(selected, selected_ids)
+    available = _available_advisors(selected_ids, category)
     return (
-        gr.update(choices=_choices(visible), value=visible_selected),
-        gallery,
+        selected_ids,
+        gr.update(choices=_choices(available), value=None),
+        render_advisor_gallery(selected, selected_ids),
         f"{len(selected_ids)} selected council member(s)",
-        render_selected_council_chips(selected),
-    )
-
-
-def update_selected_from_visible(visible_values: list[str], selected_ids: list[str] | None, search: str, category: str):
-    visible_values = visible_values or []
-    selected_set = set(selected_ids or [])
-    visible_ids = {advisor["id"] for advisor in _visible(search, category)}
-    selected_set -= visible_ids
-    selected_set |= set(visible_values)
-    ordered = [advisor["id"] for advisor in ADVISORS if advisor["id"] in selected_set]
-    selected = _selected_advisors(ordered)
-    return (
-        ordered,
-        render_advisor_gallery(selected, ordered),
-        f"{len(ordered)} selected council member(s)",
-        render_selected_council_chips(selected),
+        gr.update(choices=_choices(selected), value=None),
         gr.update(choices=_choices(selected), value=[]),
     )
 
 
-def select_all_visible(search: str, category: str, selected_ids: list[str] | None):
-    visible_ids = [advisor["id"] for advisor in _visible(search, category)]
-    selected_set = set(selected_ids or [])
-    selected_set.update(visible_ids)
-    ordered = [advisor["id"] for advisor in ADVISORS if advisor["id"] in selected_set]
-    return refresh_after_selection(ordered, search, category)
+def refresh_category(category: str, selected_ids: list[str] | None):
+    return refresh_panel2(selected_ids, category)
 
 
-def clear_selection(search: str, category: str):
-    return refresh_after_selection([], search, category)
+def add_advisor_to_council(advisor_id: str | None, selected_ids: list[str] | None, category: str):
+    selected_ids = list(selected_ids or [])
+    if advisor_id and advisor_id not in selected_ids:
+        selected_ids.append(advisor_id)
+    return refresh_panel2(selected_ids, category)
 
 
-def surprise_selection(search: str, category: str):
-    pool = _visible(search, category) or ADVISORS
+def remove_advisor_from_council(advisor_id: str | None, selected_ids: list[str] | None, category: str):
+    selected_ids = [item for item in (selected_ids or []) if item != advisor_id]
+    return refresh_panel2(selected_ids, category)
+
+
+def clear_selection(category: str):
+    return refresh_panel2([], category)
+
+
+def surprise_selection(category: str):
+    pool = _category_pool(category) or ADVISORS
     shuffled = pool[:]
     random.shuffle(shuffled)
     picked = shuffled[: min(5, len(shuffled))]
     ids = [advisor["id"] for advisor in picked]
-    return refresh_after_selection(ids, search, category)
+    return refresh_panel2(ids, category)
 
 
-def balanced_selection(search: str, category: str):
-    pool = _visible(search, category) or ADVISORS
+def balanced_selection(category: str):
+    pool = _category_pool(category) or ADVISORS
     analysis = {"themes": ["uncertainty"], "emotions": ["confusion"], "needs": ["clarity", "action"]}
     picked = select_active_speakers(pool, analysis, min(5, len(pool)), "Balanced Council")
     ids = [advisor["id"] for advisor in picked]
-    return refresh_after_selection(ids, search, category)
-
-
-def refresh_after_selection(selected_ids: list[str], search: str, category: str):
-    visible = _visible(search, category)
-    visible_set = {advisor["id"] for advisor in visible}
-    visible_value = [advisor_id for advisor_id in selected_ids if advisor_id in visible_set]
-    selected = _selected_advisors(selected_ids)
-    return (
-        selected_ids,
-        gr.update(choices=_choices(visible), value=visible_value),
-        render_advisor_gallery(selected, selected_ids),
-        f"{len(selected_ids)} selected council member(s)",
-        render_selected_council_chips(selected),
-        gr.update(choices=_choices(selected), value=[]),
-    )
+    return refresh_panel2(ids, category)
 
 
 def shuffle_active_speakers(selected_ids: list[str] | None, active_count: int, question: str):
@@ -792,13 +771,18 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                     )
 
                     with gr.Row():
-                        search = gr.Textbox(label="Search advisors", placeholder="Search names, roles, tags...")
-                        category = gr.Dropdown(category_options(ADVISORS), value="All", label="Category")
+                        advisor_search = gr.Dropdown(
+                            label="Search and add advisor",
+                            choices=_choices(_available_advisors(DEFAULT_SELECTED_IDS, "All")),
+                            value=None,
+                            interactive=True,
+                            info="Start typing a name, then click a result to add it to the council.",
+                        )
+                        category = gr.Dropdown(category_options(ADVISORS), value="All", label="Category filter")
 
                     with gr.Row(elem_classes=["actions"]):
                         balanced_btn = gr.Button("Balanced Council")
                         surprise_btn = gr.Button("Surprise Me")
-                        select_visible_btn = gr.Button("Select visible")
                         clear_btn = gr.Button("Clear")
 
                     selected_count = gr.Markdown(f"{len(DEFAULT_SELECTED_IDS)} selected council member(s)")
@@ -808,21 +792,15 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         elem_classes=["advisor-preview-block"],
                     )
 
-                    # Keep this hidden only because existing callbacks still update it.
-                    # We no longer show the chip tray visibly in the interface.
-                    selected_chips = gr.HTML(
-                        render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)),
-                        visible=False,
-                    )
-
-                    advisor_picker = gr.Dropdown(
-                        label="Edit your council",
-                        choices=_choices(ADVISORS),
-                        value=DEFAULT_SELECTED_IDS,
-                        multiselect=True,
-                        interactive=True,
-                        info="Type to search. Use search and category above to narrow the advisor list.",
-                    )
+                    with gr.Row():
+                        remove_advisor = gr.Dropdown(
+                            label="Remove advisor",
+                            choices=_choices(_selected_advisors(DEFAULT_SELECTED_IDS)),
+                            value=None,
+                            interactive=True,
+                            info="Choose one selected advisor to remove.",
+                        )
+                        remove_btn = gr.Button("Remove", elem_classes=["remove-advisor-btn"])
 
                 with gr.Group(elem_classes=["panel"]):
                     gr.HTML(
@@ -923,21 +901,43 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             """
         )
 
-    search.change(refresh_filtered_controls, [search, category, selected_state], [advisor_picker, gallery, selected_count, selected_chips])
-    category.change(refresh_filtered_controls, [search, category, selected_state], [advisor_picker, gallery, selected_count, selected_chips])
-    advisor_picker.change(
-        update_selected_from_visible,
-        [advisor_picker, selected_state, search, category],
-        [selected_state, gallery, selected_count, selected_chips, manual_active],
+    panel2_outputs = [selected_state, advisor_search, gallery, selected_count, remove_advisor, manual_active]
+
+    advisor_search.change(
+        add_advisor_to_council,
+        [advisor_search, selected_state, category],
+        panel2_outputs,
     )
-    select_visible_btn.click(
-        select_all_visible,
-        [search, category, selected_state],
-        [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active],
+
+    category.change(
+        refresh_category,
+        [category, selected_state],
+        panel2_outputs,
     )
-    clear_btn.click(clear_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
-    surprise_btn.click(surprise_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
-    balanced_btn.click(balanced_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
+
+    remove_btn.click(
+        remove_advisor_from_council,
+        [remove_advisor, selected_state, category],
+        panel2_outputs,
+    )
+
+    clear_btn.click(
+        clear_selection,
+        [category],
+        panel2_outputs,
+    )
+
+    surprise_btn.click(
+        surprise_selection,
+        [category],
+        panel2_outputs,
+    )
+
+    balanced_btn.click(
+        balanced_selection,
+        [category],
+        panel2_outputs,
+    )
     shuffle_btn.click(shuffle_active_speakers, [selected_state, active_count, question], [manual_active, status])
     transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
     use_transcript_btn.click(use_transcript, [transcript], [question])
