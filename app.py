@@ -212,9 +212,9 @@ CSS = """
 
 .gradio-container .hero {
   position: relative !important;
-  min-height: 460px !important;
+  min-height: 430px !important;
   overflow: hidden !important;
-  padding: 34px 0 26px !important;
+  padding: 28px 0 12px !important;
 }
 .gradio-container .hero::before {
   content: "";
@@ -428,7 +428,7 @@ CSS = """
   display: grid !important;
   grid-template-columns: minmax(340px, .9fr) minmax(0, 1.4fr) !important;
   gap: 18px !important;
-  padding: 8px 0 48px;
+  padding: 0 0 48px;
   align-items: start !important;
 }
 .app-shell > * { min-width: 0; }

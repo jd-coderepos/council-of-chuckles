@@ -12,7 +12,6 @@ HERO_HTML = """
         <span class="badge">Whisper small ASR</span>
         <span class="badge">70+ reply languages</span>
         <span class="badge">Tiny Aya Water</span>
-        <span class="badge">Council Engine</span>
     </div>
     </div>
     <div class="hero-art" aria-hidden="true">
