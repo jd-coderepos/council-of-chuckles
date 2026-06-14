@@ -965,8 +965,8 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             """
             <footer class="engine-panel">
               <p>This app generates original responses inspired by public personas and ideas. It does not produce real quotes.</p>
-              <p>Humor is for perspective, not dismissal. No conversations are permanently stored by this app. Text mode supports 70+ languages; voice input supports 99 Whisper languages. The model writes the lines; the Council Engine directs the scene.</p>
-              <p>Default text-only stack: Tiny Aya Water 3.35B. Voice-input stack: 3.389B. Optional full voice-in/voice-out stack: 5.389B. All configurations are below the 32B cap.</p>
+              <p>Humor is for perspective, not dismissal. No conversations are permanently stored by this app. Text mode supports 70+ languages; voice input supports 15 curated Whisper languages. The model writes the lines; the Council Engine directs the scene.</p>
+              <p>Default text-only stack: Tiny Aya Water 3.35B. Voice-input stack: 3.594B. Optional full voice-in/voice-out stack: 5.594B. All configurations are below the 32B cap; the ASR model is under 3B.</p>
             </footer>
             """
         )

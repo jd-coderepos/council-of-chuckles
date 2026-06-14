@@ -24,7 +24,7 @@ except Exception:
     spaces = _SpacesFallback()
 
 
-ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "openai/whisper-tiny")
+ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "openai/whisper-small")
 TTS_MODEL_ID = os.getenv("TTS_MODEL_ID", "openbmb/VoxCPM2")
 ENABLE_VOICE_INPUT = os.getenv("ENABLE_VOICE_INPUT", "true").lower() == "true"
 ENABLE_TTS = os.getenv("ENABLE_TTS", "false").lower() == "true"
@@ -112,7 +112,7 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
                 "Try recording a slightly longer, louder clip."
             )
 
-        return text, f"Voice mode: Whisper tiny ({ASR_MODEL_ID}, language={language_code})"
+        return text, f"Voice mode: Whisper small ({ASR_MODEL_ID}, language={language_code})"
 
     except Exception:
         print("[ASR ERROR]")

@@ -47,7 +47,7 @@ Accept the access terms for:
 
 - `CohereLabs/tiny-aya-water`
 
-Create a Hugging Face access token with read access. You may need it as the Space secret `HF_TOKEN` so the Space can download gated text model files. Voice input uses public `openai/whisper-tiny`.
+Create a Hugging Face access token with read access. You may need it as the Space secret `HF_TOKEN` so the Space can download gated text model files. Voice input uses public `openai/whisper-small`, which keeps the ASR model under 3B.
 
 ## 4. Create The Hugging Face Space
 
@@ -111,7 +111,7 @@ Set or keep these variables:
 
 ```text
 TEXT_MODEL_ID=CohereLabs/tiny-aya-water
-ASR_MODEL_ID=openai/whisper-tiny
+ASR_MODEL_ID=openai/whisper-small
 ENABLE_VOICE_INPUT=true
 TTS_MODEL_ID=openbmb/VoxCPM2
 ENABLE_TTS=false
@@ -202,7 +202,7 @@ Use this as the final audit before you submit:
 
 | Rule | Evidence in this project | Still to do |
 | --- | --- | --- |
-| REQ-01: stay under 32B | `README.md` lists Tiny Aya Water 3.35B, Whisper tiny 39M, VoxCPM2 2B, and MiniCPM5-1B ~1.08B | Confirm live Space uses these model IDs |
+| REQ-01: stay under 32B | `README.md` lists Tiny Aya Water 3.35B, Whisper small 244M, VoxCPM2 2B, and MiniCPM5-1B ~1.08B | Confirm live Space uses these model IDs |
 | REQ-02: ship a Gradio app | `app.py`, `requirements.txt`, and README front matter use Gradio | Deploy inside the official Build Small Hugging Face org |
 | REQ-03: record a demo | Demo script is in `README.md` | Record and link the final video |
 | REQ-04: post it | `README.md` has a Social post placeholder | Publish the social post and replace the placeholder |

@@ -11,7 +11,7 @@ fullWidth: true
 pinned: false
 models:
   - CohereLabs/tiny-aya-water
-  - openai/whisper-tiny
+  - openai/whisper-small
   - openbmb/VoxCPM2
   - openbmb/MiniCPM5-1B
 tags:
@@ -83,24 +83,24 @@ The app displays the engine panel before output so users can see detected themes
 | Component | Model | Parameters | Default? | Purpose |
 | --- | ---: | ---: | --- | --- |
 | Multilingual text generation | `CohereLabs/tiny-aya-water` | 3.35B | Yes | Generates advisor responses in 70+ languages |
-| Speech recognition | `openai/whisper-tiny` | 39M | Yes, if voice enabled | Transcribes voice input in 99 Whisper languages |
+| Speech recognition | `openai/whisper-small` | 244M | Yes, if voice enabled | Transcribes voice input in 15 curated Whisper languages |
 | Speech output | `openbmb/VoxCPM2` | 2B | Optional/off by default | Speaks the final verdict or advisor replies |
 | English fallback | `openbmb/MiniCPM5-1B` | ~1.08B | Optional/off by default | Lightweight English fallback |
 | Template fallback | none | 0B | Always available | Keeps app usable if models fail |
 
 Default multilingual text-only stack: **3.35B**.
 
-Default multilingual voice-input stack: **3.389B**.
+Default multilingual voice-input stack: **3.594B**.
 
-Optional full voice-in/voice-out stack: **5.389B**.
+Optional full voice-in/voice-out stack: **5.594B**.
 
-All configurations are below the 32B cap.
+All configurations are below the 32B hackathon cap. The ASR model itself stays well below 3B.
 
 ## Multilingual Support
 
-Council of Chuckles supports multilingual interaction at two levels. In text mode, the app uses Tiny Aya Water for multilingual text generation across 70+ languages. In voice mode, spoken input is transcribed with the multilingual `openai/whisper-tiny` model, which uses Whisper's 99-language tokenizer list. The transcribed text can then be answered in the same language or in a different selected output language.
+Council of Chuckles supports multilingual interaction at two levels. In text mode, the app uses Tiny Aya Water for multilingual text generation across 70+ languages. In voice mode, spoken input is transcribed with the multilingual `openai/whisper-small` model. The app intentionally exposes a curated spoken-language list instead of Whisper's full tokenizer list, because the smallest Whisper models can be uneven across languages and the UI should not overpromise. The transcribed text can then be answered in the same language or in a different selected output language.
 
-Whisper voice input languages in the app mirror OpenAI Whisper's tokenizer language list: English, Mandarin Chinese, German, Spanish, Russian, Korean, French, Japanese, Portuguese, Turkish, Polish, Catalan, Dutch, Arabic, Swedish, Italian, Indonesian, Hindi, Finnish, Vietnamese, Hebrew, Ukrainian, Greek, Malay, Czech, Romanian, Danish, Hungarian, Tamil, Norwegian, Thai, Urdu, Croatian, Bulgarian, Lithuanian, Latin, Maori, Malayalam, Welsh, Slovak, Telugu, Persian, Latvian, Bengali, Serbian, Azerbaijani, Slovenian, Kannada, Estonian, Macedonian, Breton, Basque, Icelandic, Armenian, Nepali, Mongolian, Bosnian, Kazakh, Albanian, Swahili, Galician, Marathi, Punjabi, Sinhala, Khmer, Shona, Yoruba, Somali, Afrikaans, Occitan, Georgian, Belarusian, Tajik, Sindhi, Gujarati, Amharic, Yiddish, Lao, Uzbek, Faroese, Haitian Creole, Pashto, Turkmen, Nynorsk, Maltese, Sanskrit, Luxembourgish, Myanmar, Tibetan, Tagalog, Malagasy, Assamese, Tatar, Hawaiian, Lingala, Hausa, Bashkir, Javanese, and Sundanese. Source: [OpenAI Whisper tokenizer.py](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py).
+Curated Whisper voice input languages in the app: English, German, Hindi, French, Spanish, Italian, Portuguese, Dutch, Polish, Greek, Arabic, Vietnamese, Mandarin Chinese, Japanese, and Korean. Whisper supports additional language tokens; this app keeps the selector smaller to match the reliability target for the demo. Source: [OpenAI Whisper README](https://github.com/openai/whisper).
 
 If the model cannot load, template fallback remains available. Fallback mode is English-only and clearly labels requested non-English outputs.
 
@@ -175,7 +175,7 @@ Useful environment variables:
 
 ```bash
 TEXT_MODEL_ID=CohereLabs/tiny-aya-water
-ASR_MODEL_ID=openai/whisper-tiny
+ASR_MODEL_ID=openai/whisper-small
 ENABLE_VOICE_INPUT=true
 TTS_MODEL_ID=openbmb/VoxCPM2
 ENABLE_TTS=false
