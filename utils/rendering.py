@@ -63,12 +63,29 @@ def render_advisor_card(advisor: dict, selected: bool) -> str:
     </article>
     """
 
-def render_advisor_gallery(advisors: list[dict], selected_ids: list[str]) -> str:
+def render_advisor_gallery(advisors: list[dict], selected_ids: list[str], max_cards: int = 8) -> str:
     if not advisors:
         return '<div class="empty">No advisors match this search.</div>'
+
     selected = set(selected_ids or [])
-    cards = "".join(render_advisor_card(advisor, advisor["id"] in selected) for advisor in advisors)
-    return f'<div class="advisor-grid">{cards}</div>'
+    shown = advisors[:max_cards]
+
+    cards = "".join(
+        render_advisor_card(advisor, advisor["id"] in selected)
+        for advisor in shown
+    )
+
+    if len(advisors) > max_cards:
+        note = (
+            f'<div class="empty advisor-preview-note">'
+            f'Showing {max_cards} of {len(advisors)} matching advisors. '
+            f'Use search or category to narrow the list.'
+            f'</div>'
+        )
+    else:
+        note = ""
+
+    return f'<div class="advisor-grid">{cards}</div>{note}'
 
 
 def render_selected_council_chips(advisors: list[dict]) -> str:

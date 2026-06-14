@@ -545,9 +545,10 @@ CSS = """
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
-  max-height: 520px;
-  overflow: auto;
-  padding-right: 4px;
+}
+.advisor-preview-note {
+  margin-top: 10px;
+  font-size: .82rem;
 }
 .advisor {
   min-height: 126px;
@@ -791,10 +792,13 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                     selected_count = gr.Markdown(f"{len(DEFAULT_SELECTED_IDS)} selected council member(s)")
                     selected_chips = gr.HTML(render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)))
 
-                    advisor_checks = gr.CheckboxGroup(
-                        label="Visible advisors",
+                    advisor_picker = gr.Dropdown(
+                        label="Add / remove visible advisors",
                         choices=_choices(ADVISORS),
                         value=DEFAULT_SELECTED_IDS,
+                        multiselect=True,
+                        interactive=True,
+                        info="Type to search. Use the search box and category filter above to narrow the advisor list.",
                     )
 
                     gallery = gr.HTML(render_advisor_gallery(ADVISORS, DEFAULT_SELECTED_IDS))
@@ -898,21 +902,21 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             """
         )
 
-    search.change(refresh_filtered_controls, [search, category, selected_state], [advisor_checks, gallery, selected_count, selected_chips])
-    category.change(refresh_filtered_controls, [search, category, selected_state], [advisor_checks, gallery, selected_count, selected_chips])
-    advisor_checks.change(
+    search.change(refresh_filtered_controls, [search, category, selected_state], [advisor_picker, gallery, selected_count, selected_chips])
+    category.change(refresh_filtered_controls, [search, category, selected_state], [advisor_picker, gallery, selected_count, selected_chips])
+    advisor_picker.change(
         update_selected_from_visible,
-        [advisor_checks, selected_state, search, category],
+        [advisor_picker, selected_state, search, category],
         [selected_state, gallery, selected_count, selected_chips, manual_active],
     )
     select_visible_btn.click(
         select_all_visible,
         [search, category, selected_state],
-        [selected_state, advisor_checks, gallery, selected_count, selected_chips, manual_active],
+        [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active],
     )
-    clear_btn.click(clear_selection, [search, category], [selected_state, advisor_checks, gallery, selected_count, selected_chips, manual_active])
-    surprise_btn.click(surprise_selection, [search, category], [selected_state, advisor_checks, gallery, selected_count, selected_chips, manual_active])
-    balanced_btn.click(balanced_selection, [search, category], [selected_state, advisor_checks, gallery, selected_count, selected_chips, manual_active])
+    clear_btn.click(clear_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
+    surprise_btn.click(surprise_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
+    balanced_btn.click(balanced_selection, [search, category], [selected_state, advisor_picker, gallery, selected_count, selected_chips, manual_active])
     shuffle_btn.click(shuffle_active_speakers, [selected_state, active_count, question], [manual_active, status])
     transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
     use_transcript_btn.click(use_transcript, [transcript], [question])
