@@ -9,10 +9,8 @@ from utils.advisors import advisor_by_id, category_options, filter_advisors, loa
 from utils.audio import transcribe_audio
 from utils.council import run_council
 from utils.languages import TEXT_LANGUAGES, VOICE_LANGUAGES, resolve_output_language
-from utils.matching import select_active_speakers
 from utils.rendering import render_advisor_gallery
 from utils.session import append_session_entry, export_session_markdown
-from utils.analyzer import analyze_user_topic
 
 
 ADVISORS = load_advisors()
@@ -46,9 +44,7 @@ def refresh_panel2(selected_ids: list[str] | None, category: str):
         render_advisor_gallery(selected, selected_ids),
         f"{len(selected_ids)} selected council member(s)",
         gr.update(choices=_choices(selected), value=None),
-        gr.update(choices=_choices(selected), value=[]),
     )
-
 
 def refresh_category(category: str, selected_ids: list[str] | None):
     return refresh_panel2(selected_ids, category)
@@ -77,15 +73,6 @@ def surprise_selection(category: str):
     picked = shuffled[: min(5, len(shuffled))]
     ids = [advisor["id"] for advisor in picked]
     return refresh_panel2(ids, category)
-
-def shuffle_active_speakers(selected_ids: list[str] | None, active_count: int, question: str):
-    selected = _selected_advisors(selected_ids)
-    if not selected:
-        return gr.update(choices=[], value=[]), "Select council members first."
-    analysis = analyze_user_topic(question or "uncertainty")
-    picked = select_active_speakers(selected, analysis, active_count, "Surprise me")
-    return gr.update(choices=_choices(selected), value=[advisor["id"] for advisor in picked]), "Active speakers shuffled."
-
 
 def use_transcript(transcript: str):
     return transcript or ""
@@ -824,38 +811,34 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         )
 
                         active_count = gr.Dropdown(
-                            [3, 4, 5, 6, 7],
-                            value=5,
-                            label="Active speakers",
+                            [1, 2, 3, 4, 5],
+                            value=3,
+                            label="Voices in this response",
+                            info="How many selected council members should speak in the generated answer.",
                         )
 
                     strategy = gr.Dropdown(
-                        ["Surprise me", "Match to my topic", "Manual selection", "Balanced Council"],
-                        value="Balanced Council",
-                        label="Speaker selection strategy",
+                        choices=[
+                            ("Best fit for the question", "Match to my topic"),
+                            ("Surprise me", "Surprise me"),
+                        ],
+                        value="Match to my topic",
+                        label="How to choose voices",
                     )
 
                     with gr.Row():
                         humor = gr.Slider(0, 5, value=3, step=1, label="Humor intensity")
-                        compassion = gr.Slider(0, 5, value=5, step=1, label="Compassion level")
+                        compassion = gr.Slider(0, 5, value=3, step=1, label="Compassion level")
 
-                    with gr.Accordion("Advanced options", open=False):
-                        manual_active = gr.CheckboxGroup(
-                            label="Manual active speakers",
-                            choices=_choices(_selected_advisors(DEFAULT_SELECTED_IDS)),
-                            value=[],
-                        )
-                        turns = gr.Slider(4, 12, value=6, step=1, label="Dialogue turns")
-                        include_verdict = gr.Checkbox(value=True, label="Include final verdict")
-                        demo_friendly = gr.Checkbox(value=True, label="Demo-friendly mode")
-                        use_model = gr.Checkbox(value=True, label="Use Tiny Aya model")
-
-                        speak_final = gr.Checkbox(value=False, label="Speak final verdict")
-                        speak_cards = gr.Checkbox(value=False, label="Speak every advisor card")
-                        speak_turns = gr.Checkbox(value=False, label="Speak Campfire Council turns")
+                    # Internal defaults kept hidden so the generation callback still receives
+                    # the values it expects.
+                    manual_active = gr.State([])
+                    turns = gr.State(6)
+                    include_verdict = gr.State(True)
+                    demo_friendly = gr.State(True)
+                    use_model = gr.State(True)
 
                     with gr.Row(elem_classes=["actions"]):
-                        shuffle_btn = gr.Button("Shuffle Speakers")
                         generate_btn = gr.Button("Generate Council", variant="primary")
 
             with gr.Column(scale=7, min_width=520):
@@ -891,7 +874,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             """
         )
 
-    panel2_outputs = [selected_state, advisor_search, gallery, selected_count, remove_advisor, manual_active]
+    panel2_outputs = [selected_state, advisor_search, gallery, selected_count, remove_advisor]
 
     advisor_search.change(
         add_advisor_to_council,
@@ -923,7 +906,6 @@ with gr.Blocks(title="Council of Chuckles") as demo:
         panel2_outputs,
     )
 
-    shuffle_btn.click(shuffle_active_speakers, [selected_state, active_count, question], [manual_active, status])
     transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
     use_transcript_btn.click(use_transcript, [transcript], [question])
     generate_btn.click(
