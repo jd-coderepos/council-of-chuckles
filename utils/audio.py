@@ -105,7 +105,7 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
         generation_inputs = {
             key: value
             for key, value in inputs.items()
-            if key not in {"length", "audio_chunk_index"}
+            if key != "length"
         }
 
         print(f"[ASR] processor keys={list(inputs.keys())}")
