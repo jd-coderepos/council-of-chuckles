@@ -6,6 +6,8 @@ import os
 import traceback
 from functools import lru_cache
 
+from utils.languages import WHISPER_LANGUAGE_TO_CODE
+
 try:
     import spaces  # type: ignore[import-not-found]
 except Exception:
@@ -22,8 +24,7 @@ except Exception:
     spaces = _SpacesFallback()
 
 
-ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "CohereLabs/cohere-transcribe-03-2026")
-ASR_FALLBACK_MODEL_ID = os.getenv("ASR_FALLBACK_MODEL_ID", "openai/whisper-tiny")
+ASR_MODEL_ID = os.getenv("ASR_MODEL_ID", "openai/whisper-tiny")
 TTS_MODEL_ID = os.getenv("TTS_MODEL_ID", "openbmb/VoxCPM2")
 ENABLE_VOICE_INPUT = os.getenv("ENABLE_VOICE_INPUT", "true").lower() == "true"
 ENABLE_TTS = os.getenv("ENABLE_TTS", "false").lower() == "true"
@@ -33,51 +34,12 @@ ASR_FALLBACK_MESSAGE = (
 )
 
 
-LANGUAGE_TO_CODE = {
-    "English": "en",
-    "French": "fr",
-    "German": "de",
-    "Italian": "it",
-    "Spanish": "es",
-    "Portuguese": "pt",
-    "Greek": "el",
-    "Dutch": "nl",
-    "Polish": "pl",
-    "Arabic": "ar",
-    "Vietnamese": "vi",
-    "Mandarin Chinese": "zh",
-    "Japanese": "ja",
-    "Korean": "ko",
-}
-
-
 @lru_cache(maxsize=1)
-def _load_asr_model():
-    import torch
-    from transformers import AutoProcessor, CohereAsrForConditionalGeneration
-
-    processor = AutoProcessor.from_pretrained(
-        ASR_MODEL_ID,
-        trust_remote_code=True,
-    )
-
-    model = CohereAsrForConditionalGeneration.from_pretrained(
-        ASR_MODEL_ID,
-        device_map="auto",
-        torch_dtype="auto",
-        trust_remote_code=True,
-    )
-
-    model.eval()
-    return processor, model, torch
-
-
-@lru_cache(maxsize=1)
-def _load_fallback_asr_pipeline():
+def _load_asr_pipeline():
     import torch
     from transformers import pipeline
 
-    kwargs = {"model": ASR_FALLBACK_MODEL_ID}
+    kwargs = {"model": ASR_MODEL_ID}
     if torch.cuda.is_available():
         kwargs["device"] = 0
         kwargs["torch_dtype"] = torch.float16
@@ -117,18 +79,6 @@ def _decode_text(decoded) -> str:
     return (decoded or "").strip()
 
 
-def _transcribe_with_fallback(audio, language_code: str) -> tuple[str, str]:
-    pipe = _load_fallback_asr_pipeline()
-    result = pipe(
-        {"array": audio, "sampling_rate": 16000},
-        generate_kwargs={"language": language_code, "task": "transcribe"},
-    )
-    text = _decode_text(result)
-    if not text:
-        return "", ASR_FALLBACK_MESSAGE
-    return text, f"Voice mode: Whisper fallback ({ASR_FALLBACK_MODEL_ID}, language={language_code})"
-
-
 @spaces.GPU(duration=60)
 def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str, str]:
     if not audio_path:
@@ -138,46 +88,23 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
         return "", "Voice input is currently disabled. Please type your question instead."
 
     try:
-        language_code = LANGUAGE_TO_CODE.get(spoken_language, "en")
+        language_code = WHISPER_LANGUAGE_TO_CODE.get(spoken_language, "en")
 
         print(f"[ASR] audio_path={audio_path}")
+        print(f"[ASR] model={ASR_MODEL_ID}")
         print(f"[ASR] spoken_language={spoken_language} -> language_code={language_code}")
 
         audio, audio_error, duration_s, peak = _prepare_audio(audio_path)
         if audio_error:
             return "", audio_error
 
-        processor, model, torch = _load_asr_model()
-
-        inputs = processor(
-            audio=audio,
-            sampling_rate=16000,
-            return_tensors="pt",
-            language=language_code,
-        )
-
-        audio_chunk_index = inputs.get("audio_chunk_index")
-
-        inputs.to(model.device, dtype=model.dtype)
-        generation_inputs = {key: value for key, value in inputs.items() if key != "length"}
-
-        print(f"[ASR] processor keys={list(inputs.keys())}")
-        for key, value in generation_inputs.items():
-            shape = getattr(value, "shape", None)
-            dtype = getattr(value, "dtype", None)
-            print(f"[ASR] {key} shape={shape}, dtype={dtype}")
         print(f"[ASR] duration_s={duration_s:.2f}, peak={peak:.4f}")
 
-        with torch.inference_mode():
-            outputs = model.generate(**generation_inputs, max_new_tokens=256)
-
-        decode_kwargs = {"skip_special_tokens": True}
-        if audio_chunk_index is not None:
-            decode_kwargs["audio_chunk_index"] = audio_chunk_index
-            decode_kwargs["language"] = language_code
-
-        decoded = processor.decode(outputs, **decode_kwargs)
-        text = _decode_text(decoded)
+        result = _load_asr_pipeline()(
+            {"array": audio, "sampling_rate": 16000},
+            generate_kwargs={"language": language_code, "task": "transcribe"},
+        )
+        text = _decode_text(result)
 
         if not text:
             return "", (
@@ -185,22 +112,12 @@ def transcribe_audio(audio_path: str | None, spoken_language: str) -> tuple[str,
                 "Try recording a slightly longer, louder clip."
             )
 
-        return text, f"Voice mode: Cohere Transcribe ({ASR_MODEL_ID}, language={language_code})"
+        return text, f"Voice mode: Whisper tiny ({ASR_MODEL_ID}, language={language_code})"
 
-    except Exception as exc:
+    except Exception:
         print("[ASR ERROR]")
         traceback.print_exc()
-        try:
-            if "audio" not in locals() or audio is None:
-                audio, audio_error, _, _ = _prepare_audio(audio_path)
-                if audio_error:
-                    return "", audio_error
-            print(f"[ASR] trying fallback model={ASR_FALLBACK_MODEL_ID}")
-            return _transcribe_with_fallback(audio, LANGUAGE_TO_CODE.get(spoken_language, "en"))
-        except Exception:
-            print("[ASR FALLBACK ERROR]")
-            traceback.print_exc()
-            return "", ASR_FALLBACK_MESSAGE
+        return "", ASR_FALLBACK_MESSAGE
 
 
 def synthesize_speech(text: str, language: str) -> tuple[str | None, str]:

@@ -11,7 +11,7 @@ fullWidth: true
 pinned: false
 models:
   - CohereLabs/tiny-aya-water
-  - CohereLabs/cohere-transcribe-03-2026
+  - openai/whisper-tiny
   - openbmb/VoxCPM2
   - openbmb/MiniCPM5-1B
 tags:
@@ -83,22 +83,24 @@ The app displays the engine panel before output so users can see detected themes
 | Component | Model | Parameters | Default? | Purpose |
 | --- | ---: | ---: | --- | --- |
 | Multilingual text generation | `CohereLabs/tiny-aya-water` | 3.35B | Yes | Generates advisor responses in 70+ languages |
-| Speech recognition | `CohereLabs/cohere-transcribe-03-2026` | 2B | Yes, if voice enabled | Transcribes voice input in 14 languages |
+| Speech recognition | `openai/whisper-tiny` | 39M | Yes, if voice enabled | Transcribes voice input in 99 Whisper languages |
 | Speech output | `openbmb/VoxCPM2` | 2B | Optional/off by default | Speaks the final verdict or advisor replies |
 | English fallback | `openbmb/MiniCPM5-1B` | ~1.08B | Optional/off by default | Lightweight English fallback |
 | Template fallback | none | 0B | Always available | Keeps app usable if models fail |
 
 Default multilingual text-only stack: **3.35B**.
 
-Default multilingual voice-input stack: **5.35B**.
+Default multilingual voice-input stack: **3.389B**.
 
-Optional full voice-in/voice-out stack: **7.35B**.
+Optional full voice-in/voice-out stack: **5.389B**.
 
 All configurations are below the 32B cap.
 
 ## Multilingual Support
 
-Council of Chuckles supports multilingual interaction at two levels. In text mode, the app uses Tiny Aya Water for multilingual text generation across 70+ languages. In voice mode, spoken input is transcribed with Cohere Transcribe, which currently supports 14 spoken languages: English, French, German, Italian, Spanish, Portuguese, Greek, Dutch, Polish, Arabic, Vietnamese, Mandarin Chinese, Japanese, and Korean. The transcribed text can then be answered in the same language or in a different selected output language.
+Council of Chuckles supports multilingual interaction at two levels. In text mode, the app uses Tiny Aya Water for multilingual text generation across 70+ languages. In voice mode, spoken input is transcribed with the multilingual `openai/whisper-tiny` model, which uses Whisper's 99-language tokenizer list. The transcribed text can then be answered in the same language or in a different selected output language.
+
+Whisper voice input languages in the app mirror OpenAI Whisper's tokenizer language list: English, Mandarin Chinese, German, Spanish, Russian, Korean, French, Japanese, Portuguese, Turkish, Polish, Catalan, Dutch, Arabic, Swedish, Italian, Indonesian, Hindi, Finnish, Vietnamese, Hebrew, Ukrainian, Greek, Malay, Czech, Romanian, Danish, Hungarian, Tamil, Norwegian, Thai, Urdu, Croatian, Bulgarian, Lithuanian, Latin, Maori, Malayalam, Welsh, Slovak, Telugu, Persian, Latvian, Bengali, Serbian, Azerbaijani, Slovenian, Kannada, Estonian, Macedonian, Breton, Basque, Icelandic, Armenian, Nepali, Mongolian, Bosnian, Kazakh, Albanian, Swahili, Galician, Marathi, Punjabi, Sinhala, Khmer, Shona, Yoruba, Somali, Afrikaans, Occitan, Georgian, Belarusian, Tajik, Sindhi, Gujarati, Amharic, Yiddish, Lao, Uzbek, Faroese, Haitian Creole, Pashto, Turkmen, Nynorsk, Maltese, Sanskrit, Luxembourgish, Myanmar, Tibetan, Tagalog, Malagasy, Assamese, Tatar, Hawaiian, Lingala, Hausa, Bashkir, Javanese, and Sundanese. Source: [OpenAI Whisper tokenizer.py](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py).
 
 If the model cannot load, template fallback remains available. Fallback mode is English-only and clearly labels requested non-English outputs.
 
@@ -165,15 +167,15 @@ Create a Gradio Space, upload the repository, and keep `app.py` as the app file.
 ZeroGPU deployment notes:
 
 - Select ZeroGPU hardware in the Space settings.
-- Accept the access terms for the Cohere model pages from the Hugging Face account that owns the Space.
-- Add an `HF_TOKEN` Space secret if the Space needs authenticated model downloads.
+- Accept the access terms for the Tiny Aya Water model page from the Hugging Face account that owns the Space.
+- Add an `HF_TOKEN` Space secret if the Space needs authenticated model downloads for gated text models.
 - Keep `ENABLE_TTS=false` for the first stable build, then enable optional voice output only after text and ASR are working.
 
 Useful environment variables:
 
 ```bash
 TEXT_MODEL_ID=CohereLabs/tiny-aya-water
-ASR_MODEL_ID=CohereLabs/cohere-transcribe-03-2026
+ASR_MODEL_ID=openai/whisper-tiny
 ENABLE_VOICE_INPUT=true
 TTS_MODEL_ID=openbmb/VoxCPM2
 ENABLE_TTS=false
@@ -231,4 +233,3 @@ This app targets Thousand Token Wood, Tiny Titan, Off-Brand Award, Best Demo, Of
 The app loads advisors from `data/advisors.json`. Required fields are `id`, `name`, and `category`. Optional fields include `era`, `role`, `core_wisdom`, `signature_style`, `mastermind_voice`, `comic_voice`, `catchphrase`, `best_for`, `avoid`, `avatar`, and `avatar_alt`.
 
 Legacy `jokester_voice` is supported and normalized to `comic_voice`.
-
