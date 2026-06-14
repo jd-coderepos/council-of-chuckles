@@ -759,6 +759,42 @@ CSS = """
   margin: 0 !important;
 }
 
+.stage .panel-title,
+.stage .panel-title h2,
+.stage .panel-title h2 span:not(.number),
+.stage .stage-status-line,
+.stage .active-speakers,
+.stage .active-speakers h3,
+.stage .engine-panel,
+.stage .engine-panel h3,
+.stage .engine-panel p {
+  color: #fff7ea !important;
+}
+
+.stage .number {
+  color: var(--orange) !important;
+}
+
+.stage .stage-status-line,
+.stage .engine-panel p,
+.stage .active-speakers h3,
+.stage-status,
+.stage-status * {
+  color: #ffe8c2 !important;
+}
+
+.stage .speakers .chip,
+.stage .speakers .chip span {
+  color: #fff7ea !important;
+}
+
+.stage .speakers .chip .avatar-fallback,
+.stage .speakers .chip .avatar-img,
+.stage .dialogue-turn .avatar-fallback,
+.stage .dialogue-turn .avatar-img {
+  color: var(--ink) !important;
+}
+
 .stage-placeholder {
   margin-top: 12px !important;
 }
