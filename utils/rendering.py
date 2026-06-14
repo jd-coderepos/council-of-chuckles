@@ -65,7 +65,7 @@ def render_advisor_card(advisor: dict, selected: bool) -> str:
 
 def render_advisor_gallery(advisors: list[dict], selected_ids: list[str], max_cards: int = 8) -> str:
     if not advisors:
-        return '<div class="empty">No advisors match this search.</div>'
+        return '<div class="empty">No council members selected yet.</div>'
 
     selected = set(selected_ids or [])
     shown = advisors[:max_cards]

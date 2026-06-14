@@ -78,15 +78,6 @@ def surprise_selection(category: str):
     ids = [advisor["id"] for advisor in picked]
     return refresh_panel2(ids, category)
 
-
-def balanced_selection(category: str):
-    pool = _category_pool(category) or ADVISORS
-    analysis = {"themes": ["uncertainty"], "emotions": ["confusion"], "needs": ["clarity", "action"]}
-    picked = select_active_speakers(pool, analysis, min(5, len(pool)), "Balanced Council")
-    ids = [advisor["id"] for advisor in picked]
-    return refresh_panel2(ids, category)
-
-
 def shuffle_active_speakers(selected_ids: list[str] | None, active_count: int, question: str):
     selected = _selected_advisors(selected_ids)
     if not selected:
@@ -781,7 +772,6 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         category = gr.Dropdown(category_options(ADVISORS), value="All", label="Category filter")
 
                     with gr.Row(elem_classes=["actions"]):
-                        balanced_btn = gr.Button("Balanced Council")
                         surprise_btn = gr.Button("Surprise Me")
                         clear_btn = gr.Button("Clear")
 
@@ -933,11 +923,6 @@ with gr.Blocks(title="Council of Chuckles") as demo:
         panel2_outputs,
     )
 
-    balanced_btn.click(
-        balanced_selection,
-        [category],
-        panel2_outputs,
-    )
     shuffle_btn.click(shuffle_active_speakers, [selected_state, active_count, question], [manual_active, status])
     transcribe_btn.click(transcribe, [audio, spoken_language], [transcript, status])
     use_transcript_btn.click(use_transcript, [transcript], [question])
