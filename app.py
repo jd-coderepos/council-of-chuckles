@@ -37,8 +37,8 @@ def refresh_filtered_controls(search: str, category: str, selected_ids: list[str
     selected_ids = selected_ids or []
     visible_ids = {advisor["id"] for advisor in visible}
     visible_selected = [advisor_id for advisor_id in selected_ids if advisor_id in visible_ids]
-    gallery = render_advisor_gallery(visible, selected_ids)
     selected = _selected_advisors(selected_ids)
+    gallery = render_advisor_gallery(selected, selected_ids)
     return (
         gr.update(choices=_choices(visible), value=visible_selected),
         gallery,
@@ -57,7 +57,7 @@ def update_selected_from_visible(visible_values: list[str], selected_ids: list[s
     selected = _selected_advisors(ordered)
     return (
         ordered,
-        render_advisor_gallery(_visible(search, category), ordered),
+        render_advisor_gallery(selected, ordered),
         f"{len(ordered)} selected council member(s)",
         render_selected_council_chips(selected),
         gr.update(choices=_choices(selected), value=[]),
@@ -101,7 +101,7 @@ def refresh_after_selection(selected_ids: list[str], search: str, category: str)
     return (
         selected_ids,
         gr.update(choices=_choices(visible), value=visible_value),
-        render_advisor_gallery(visible, selected_ids),
+        render_advisor_gallery(selected, selected_ids),
         f"{len(selected_ids)} selected council member(s)",
         render_selected_council_chips(selected),
         gr.update(choices=_choices(selected), value=[]),
@@ -550,6 +550,18 @@ CSS = """
   margin-top: 10px;
   font-size: .82rem;
 }
+.advisor-preview-block {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.advisor-preview-block > div {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
 .advisor {
   min-height: 126px;
   border: 1px solid var(--line);
@@ -790,18 +802,27 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                         clear_btn = gr.Button("Clear")
 
                     selected_count = gr.Markdown(f"{len(DEFAULT_SELECTED_IDS)} selected council member(s)")
-                    selected_chips = gr.HTML(render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)))
+
+                    gallery = gr.HTML(
+                        render_advisor_gallery(_selected_advisors(DEFAULT_SELECTED_IDS), DEFAULT_SELECTED_IDS),
+                        elem_classes=["advisor-preview-block"],
+                    )
+
+                    # Keep this hidden only because existing callbacks still update it.
+                    # We no longer show the chip tray visibly in the interface.
+                    selected_chips = gr.HTML(
+                        render_selected_council_chips(_selected_advisors(DEFAULT_SELECTED_IDS)),
+                        visible=False,
+                    )
 
                     advisor_picker = gr.Dropdown(
-                        label="Add / remove visible advisors",
+                        label="Edit your council",
                         choices=_choices(ADVISORS),
                         value=DEFAULT_SELECTED_IDS,
                         multiselect=True,
                         interactive=True,
-                        info="Type to search. Use the search box and category filter above to narrow the advisor list.",
+                        info="Type to search. Use search and category above to narrow the advisor list.",
                     )
-
-                    gallery = gr.HTML(render_advisor_gallery(ADVISORS, DEFAULT_SELECTED_IDS))
 
                 with gr.Group(elem_classes=["panel"]):
                     gr.HTML(
