@@ -448,6 +448,36 @@ CSS = """
   margin-right: 7px;
 }
 
+/* Make Gradio radio buttons visibly selected. */
+.gradio-container input[type="radio"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  border: 1.8px solid #e6b56e !important;
+  border-radius: 999px !important;
+  background: #fffdf8 !important;
+  box-shadow: none !important;
+  vertical-align: middle !important;
+}
+
+.gradio-container input[type="radio"]:checked {
+  border-color: var(--orange) !important;
+  background:
+    radial-gradient(circle at center, var(--orange) 0 42%, #fffdf8 45% 100%) !important;
+}
+
+.gradio-container input[type="radio"]:focus-visible {
+  outline: 3px solid rgba(255, 122, 24, .18) !important;
+  outline-offset: 2px !important;
+}
+
+.gradio-container .scene-radio label:has(input[type="radio"]:checked) {
+  border-color: var(--orange) !important;
+  background: #fff1d0 !important;
+}
+
 /* Gradio form controls. */
 .gradio-container label,
 .gradio-container .block-label,
@@ -814,16 +844,17 @@ with gr.Blocks(title="Council of Chuckles") as demo:
                             [1, 2, 3, 4, 5],
                             value=3,
                             label="Voices in this response",
-                            info="How many selected council members should speak in the generated answer.",
+                            info="How many selected advisors should speak.",
                         )
 
                     strategy = gr.Dropdown(
                         choices=[
-                            ("Best fit for the question", "Match to my topic"),
-                            ("Surprise me", "Surprise me"),
+                            ("Best match to the question", "Match to my topic"),
+                            ("Random from my council", "Surprise me"),
                         ],
                         value="Match to my topic",
-                        label="How to choose voices",
+                        label="Speaker picker",
+                        info="Used when your council has more members than the number of voices above.",
                     )
 
                     with gr.Row():
