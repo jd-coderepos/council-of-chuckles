@@ -44,10 +44,10 @@ This submission targets the **Thousand Token Wood** track: playful, AI-native, a
 
 - Live Space: https://huggingface.co/spaces/build-small-hackathon/council-of-chuckles
 - GitHub repo: https://github.com/jd-coderepos/council-of-chuckles
-- Demo video: TODO: add final demo URL
-- Social post: TODO: add final social-media post URL
-- Field notes: 
-- Agent traces: 
+- Demo video: (intro to the APP and text-only mode demo; ~8 minutes) https://youtu.be/zQs34caEcas?si=REPj1d2SnUV4LLnC; (voice-only mode demo; ~4 minutes) https://youtu.be/-2Uzs6aKAwc?si=7uTxiidnOaDb0z1g
+- Social post: [Linkedin post](https://www.linkedin.com/posts/jennifer-l-dsouza_buildsmallhackathon-huggingface-gradio-ugcPost-7472322128646742017-aiKw/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAAJH7gwBPr4GzY6aqpAOF4R6kX-N1rYsgZ4)
+- Field notes: [Blogpost on Making Great Thinkers Funny with Tiny Models](https://medium.com/@jenlindadsouza/making-great-thinkers-funny-with-tiny-models-field-notes-from-the-build-small-hackathon-578269f386e9)
+- Agent traces: https://huggingface.co/datasets/jdsouza/council-of-chuckles-codex-traces
 
 ## Demo Script
 
