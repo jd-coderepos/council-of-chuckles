@@ -127,6 +127,7 @@ def generate(
     demo_friendly: bool,
     use_model: bool,
     session: list[dict] | None,
+    input_language_choice: str = "English",
 ):
     output_language = resolve_output_language(output_language_choice, custom_output_language)
     selected = _selected_advisors(selected_ids)
@@ -146,6 +147,7 @@ def generate(
             include_verdict=include_verdict,
             demo_friendly=demo_friendly,
             use_model=use_model,
+            input_language=input_language_choice,
         )
     except Exception as exc:
         message = str(exc).lower()
@@ -1267,6 +1269,7 @@ with gr.Blocks(title="Council of Chuckles") as demo:
             demo_friendly,
             use_model,
             session_state,
+            spoken_language,
         ],
         [stage_display, session_state],
     )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .analyzer import analyze_user_topic
 from .fallback import advisor_card_text, campfire_lines, trigger_reasons, verdict_text
+from .languages import localized_copy
 from .matching import select_active_speakers
 from .prompts import advisor_prompt, campfire_prompt, council_prompt
 from .models import generate_text
@@ -43,7 +44,7 @@ def _render_generated_dialogue(
     cards = []
 
     for raw_line in generated.splitlines():
-        line = raw_line.strip()
+        line = raw_line.strip().replace("：", ":")
         if not line or ":" not in line:
             continue
 
@@ -86,6 +87,7 @@ def make_final_verdict(
     topic: str,
     analysis: dict,
     active_speakers: list[dict],
+    input_language: str,
     output_language: str,
     include_verdict: bool,
     use_model: bool,
@@ -103,6 +105,7 @@ def make_final_verdict(
             topic=topic,
             analysis=analysis,
             active_speakers=active_speakers,
+            input_language=input_language,
             output_language=output_language,
             council_discussion=council_discussion,
             humor_intensity=humor_intensity,
@@ -118,10 +121,11 @@ def make_final_verdict(
 
         if generated:
             generated = generated.strip()
-            if "The Gavel Falls:" in generated:
+            verdict_header = localized_copy(output_language)["verdict_header"]
+            if output_language == "English" and "The Gavel Falls:" in generated:
                 generated = generated[generated.find("The Gavel Falls:") :].strip()
-            elif not generated.startswith("The Gavel Falls"):
-                generated = "The Gavel Falls:\n" + generated
+            elif not generated.startswith(verdict_header):
+                generated = verdict_header + "\n" + generated
             return generated
 
     return verdict_text(topic, analysis, active_speakers, output_language)
@@ -141,6 +145,7 @@ def run_council(
     include_verdict: bool,
     demo_friendly: bool,
     use_model: bool = True,
+    input_language: str = "English",
 ) -> dict:
     topic = (topic or "").strip()
     if not topic:
@@ -169,11 +174,7 @@ def run_council(
         }
 
     if detect_harmful_humor_request(topic):
-        text = (
-            "The council refuses to bully its own quest-giver or anyone else. "
-            "It can offer absurdist humor about procrastination, bureaucracy, awkward timing, "
-            "or the situation instead."
-        )
+        text = localized_copy(output_language)["harmful_refusal"]
         return {
             "engine_html": "",
             "active_html": "",
@@ -213,7 +214,7 @@ def run_council(
         plan, fallback_turns = campfire_lines(active_speakers, topic, analysis, turns, mood, output_language)
         generated = ""
         if model_calls_used < max_model_calls:
-            prompt = campfire_prompt(topic, output_language, humor_intensity, compassion_level, analysis, active_speakers, plan)
+            prompt = campfire_prompt(topic, input_language, output_language, humor_intensity, compassion_level, analysis, active_speakers, plan)
             dialogue_temperature = min(0.9, 0.65 + 0.05 * int(humor_intensity or 0))
             model_calls_used += 1
             generated, model_status = _generate_text_or_fallback(
@@ -241,6 +242,7 @@ def run_council(
             topic,
             analysis,
             active_speakers,
+            input_language,
             output_language,
             include_verdict,
             use_model and model_calls_used < max_model_calls,
@@ -266,7 +268,7 @@ def run_council(
         for advisor in active_speakers:
             generated = ""
             if model_calls_used < max_model_calls:
-                prompt = advisor_prompt(topic, output_language, mode, humor_intensity, compassion_level, analysis, advisor)
+                prompt = advisor_prompt(topic, input_language, output_language, mode, humor_intensity, compassion_level, analysis, advisor)
                 model_calls_used += 1
                 generated, model_status = _generate_text_or_fallback(prompt, MAX_TOKENS[mode])
                 status_bits.append(model_status)
@@ -278,6 +280,7 @@ def run_council(
             topic,
             analysis,
             active_speakers,
+            input_language,
             output_language,
             include_verdict,
             use_model and model_calls_used < max_model_calls,
@@ -299,7 +302,7 @@ def run_council(
 
     generated = ""
     if model_calls_used < max_model_calls:
-        prompt = council_prompt(topic, output_language, mode, humor_intensity, compassion_level, analysis, active_speakers)
+        prompt = council_prompt(topic, input_language, output_language, mode, humor_intensity, compassion_level, analysis, active_speakers)
         model_calls_used += 1
         generated, model_status = _generate_text_or_fallback(prompt, MAX_TOKENS["Council Mode"])
         status_bits.append(model_status)
@@ -321,6 +324,7 @@ def run_council(
         topic,
         analysis,
         active_speakers,
+        input_language,
         output_language,
         include_verdict,
         use_model and model_calls_used < max_model_calls,

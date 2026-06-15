@@ -12,7 +12,7 @@ THEME_KEYWORDS: dict[str, list[str]] = {
     "perfectionism": ["perfect", "not good enough", "flawless", "mistake", "standards", "polish"],
     "burnout": ["burnout", "exhausted", "tired", "drained", "overworked", "no energy"],
     "conflict": ["conflict", "fight", "argument", "tension", "disagree", "angry at"],
-    "career": ["career", "job", "work", "promotion", "interview", "boss", "colleague"],
+    "career": ["career", "job", "work", "promotion", "interview", "boss", "colleague", "老板", "工作", "同事"],
     "money": ["money", "budget", "debt", "salary", "rent", "investment", "financial"],
     "creativity": ["creative", "write", "art", "idea", "blocked", "project"],
     "meaning": ["meaning", "purpose", "why", "empty", "direction", "life"],
@@ -23,7 +23,7 @@ THEME_KEYWORDS: dict[str, list[str]] = {
     "decision-making": ["decide", "choice", "options", "whether", "uncertain", "decision"],
     "grief": ["grief", "loss", "died", "mourning", "miss them"],
     "uncertainty": ["uncertain", "unknown", "worry", "future", "ambiguous"],
-    "productivity": ["productive", "tasks", "todo", "focus", "planning", "schedule"],
+    "productivity": ["productive", "tasks", "todo", "focus", "planning", "schedule", "待办", "任务", "清单", "计划", "日程", "专注"],
     "confidence": ["confidence", "believe in myself", "self-esteem", "courage"],
     "fear of judgment": ["judge", "judged", "embarrass", "shame", "criticized", "rejected"],
 }
@@ -32,7 +32,7 @@ EMOTION_KEYWORDS: dict[str, list[str]] = {
     "anxiety": ["anxious", "anxiety", "worried", "panic", "nervous", "afraid"],
     "sadness": ["sad", "down", "cry", "depressed", "heartbroken"],
     "anger": ["angry", "furious", "resent", "mad", "rage"],
-    "overwhelm": ["overwhelmed", "too much", "can't handle", "swamped", "buried"],
+    "overwhelm": ["overwhelmed", "too much", "can't handle", "swamped", "buried", "太多", "不知所措", "受不了"],
     "self-doubt": ["doubt", "not good enough", "imposter", "inadequate", "fail"],
     "excitement": ["excited", "thrilled", "energized", "hopeful"],
     "confusion": ["confused", "unclear", "lost", "don't know", "unsure"],
@@ -46,9 +46,9 @@ EMOTION_KEYWORDS: dict[str, list[str]] = {
 NEED_KEYWORDS: dict[str, list[str]] = {
     "courage": ["afraid", "fear", "brave", "submit", "start"],
     "perspective": ["perspective", "overthinking", "spiral", "meaning", "worry"],
-    "action": ["do", "next", "start", "submit", "finish", "move"],
+    "action": ["do", "next", "start", "submit", "finish", "move", "开始", "下一步", "做"],
     "comfort": ["comfort", "sad", "grief", "hard", "hurt"],
-    "structure": ["plan", "steps", "schedule", "organize", "structure"],
+    "structure": ["plan", "steps", "schedule", "organize", "structure", "计划", "步骤", "安排", "整理"],
     "humor": ["funny", "laugh", "comic", "lighter", "humor"],
     "rest": ["burnout", "tired", "exhausted", "rest", "sleep"],
     "clarity": ["confused", "unclear", "decide", "choice", "clarity"],
@@ -90,4 +90,3 @@ def analyze_user_topic(text: str) -> dict:
         "summary": " + ".join(summary_parts),
         "risk_level": "crisis" if detect_crisis(text) else "normal",
     }
-

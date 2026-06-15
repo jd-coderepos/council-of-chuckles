@@ -1,4 +1,6 @@
-"""Language options for text and spoken input."""
+"""Language options and lightweight localization helpers."""
+
+from __future__ import annotations
 
 TEXT_LANGUAGES = [
     "English",
@@ -16,6 +18,462 @@ TEXT_LANGUAGES = [
     "Japanese",
     "Korean",
 ]
+
+LANGUAGE_ALIASES = {
+    "Chinese": "Mandarin Chinese",
+    "Mandarin": "Mandarin Chinese",
+    "Simplified Chinese": "Mandarin Chinese",
+    "Chinese (Simplified)": "Mandarin Chinese",
+    "Brazilian Portuguese": "Portuguese",
+    "Portuguese (Brazil)": "Portuguese",
+    "zh": "Mandarin Chinese",
+    "chinese": "Mandarin Chinese",
+    "mandarin": "Mandarin Chinese",
+    "simplified chinese": "Mandarin Chinese",
+    "chinese (simplified)": "Mandarin Chinese",
+    "brazilian portuguese": "Portuguese",
+    "portuguese (brazil)": "Portuguese",
+}
+
+LANGUAGE_SPECS = {
+    "English": {
+        "native_name": "English",
+        "instruction": "Answer in natural English.",
+    },
+    "German": {
+        "native_name": "Deutsch",
+        "instruction": "Antworte vollstaendig auf Deutsch. Fuege keine englische Uebersetzung hinzu.",
+    },
+    "French": {
+        "native_name": "francais",
+        "instruction": "Reponds entierement en francais naturel. N'ajoute pas de traduction anglaise.",
+    },
+    "Spanish": {
+        "native_name": "espanol",
+        "instruction": "Responde completamente en espanol natural. No anadas traduccion al ingles.",
+    },
+    "Italian": {
+        "native_name": "italiano",
+        "instruction": "Rispondi interamente in italiano naturale. Non aggiungere una traduzione inglese.",
+    },
+    "Portuguese": {
+        "native_name": "portugues",
+        "instruction": "Responda inteiramente em portugues natural. Nao acrescente traducao para ingles.",
+    },
+    "Dutch": {
+        "native_name": "Nederlands",
+        "instruction": "Antwoord volledig in natuurlijk Nederlands. Voeg geen Engelse vertaling toe.",
+    },
+    "Polish": {
+        "native_name": "polski",
+        "instruction": "Odpowiedz w calosci naturalnym jezykiem polskim. Nie dodawaj tlumaczenia na angielski.",
+    },
+    "Greek": {
+        "native_name": "Ελληνικά",
+        "instruction": "Απάντησε εξ ολοκλήρου στα φυσικά ελληνικά. Μην προσθέτεις αγγλική μετάφραση.",
+    },
+    "Arabic": {
+        "native_name": "العربية",
+        "instruction": "أجب بالكامل بالعربية الطبيعية. لا تضف ترجمة إنجليزية.",
+    },
+    "Vietnamese": {
+        "native_name": "Tieng Viet",
+        "instruction": "Tra loi hoan toan bang tieng Viet tu nhien. Khong them ban dich tieng Anh.",
+    },
+    "Mandarin Chinese": {
+        "native_name": "中文（普通话，简体）",
+        "instruction": "请完全使用自然、简体中文回答。不要附加英文翻译。",
+    },
+    "Japanese": {
+        "native_name": "日本語",
+        "instruction": "自然な日本語だけで答えてください。英訳は追加しないでください。",
+    },
+    "Korean": {
+        "native_name": "한국어",
+        "instruction": "자연스러운 한국어로만 답하세요. 영어 번역을 덧붙이지 마세요.",
+    },
+}
+
+LOCALIZED_FALLBACK = {
+    "English": {
+        "situation": "this situation",
+        "card_title": "Title: In the spirit of {advisor}",
+        "card_perspective": "Perspective: Treat {situation} as a small object on the table, not the boss of the room.",
+        "card_hidden": "Hidden wisdom: The useful part is usually the next honest handle you can grab.",
+        "card_action": "Tiny next action: Do one visible ten-minute move before trying to solve the whole story.",
+        "card_reminder": "Ridiculous but useful reminder: Give the problem a tiny chair, not the whole building.",
+        "turns": {
+            "validate": "Name the concern before it becomes the whole weather system.",
+            "reframe": "This is information, not a prophecy; let it shrink to human size.",
+            "gentle disagreement": "Your stress is loud, but it has not been promoted to chief executive.",
+            "comic relief": "The to-do list may wear a cape; it still cannot vote.",
+            "practical action": "Make the next step physical: one small visible action, then breathe.",
+            "synthesize": "The council sees the pattern; answer it with one small act.",
+            "tiny next step": "Choose the first reversible step and make it pleasantly boring.",
+            "challenge": "Do not debate the whole mountain; move one pebble.",
+        },
+        "verdict_header": "The Gavel Falls:",
+        "agreement": "What the council agrees on: {situation} needs one next step, not a royal decree.",
+        "disagreement": "What they disagree on: one voice would simplify, another would test the duty, another would add snacks.",
+        "hidden": "Hidden pattern: the question is pretending to be huge, but it has a small door.",
+        "action": "Tiny next action: write the next move, then do it for ten minutes.",
+        "reminder": "Ridiculous but useful reminder: the list is paper, not your landlord.",
+        "professional_disclaimer": "This is not professional advice. Please consult a qualified professional for high-stakes decisions.",
+        "safe_support": "I am really sorry you are facing this. If you might hurt yourself or someone else, or if you are in immediate danger, please contact local emergency services now. If you can, reach out to a trusted person and tell them plainly that you need support. If you are in the United States or Canada, call or text 988 for crisis support. The council pauses the jokes here; your safety matters first.",
+        "harmful_refusal": "The council will not bully the user or anyone else. It can offer playful humor about the situation instead.",
+    },
+    "German": {
+        "situation": "diese Situation",
+        "card_title": "Titel: Im Geist von {advisor}",
+        "card_perspective": "Perspektive: Behandle {situation} wie etwas Kleines auf dem Tisch, nicht wie den Chef des Raums.",
+        "card_hidden": "Verborgene Weisheit: Der nuetzliche Teil ist meist der naechste ehrliche Griff.",
+        "card_action": "Kleiner naechster Schritt: Mach zehn Minuten lang eine sichtbare Handlung.",
+        "card_reminder": "Laecherlich, aber nuetzlich: Gib dem Problem einen kleinen Stuhl, nicht das ganze Haus.",
+        "turns": {
+            "validate": "Benenne die Sorge, bevor sie das ganze Wetter spielt.",
+            "reframe": "Das ist Information, keine Prophezeiung; lass es menschlich klein werden.",
+            "gentle disagreement": "Dein Stress ist laut, aber er ist nicht befoerdert worden.",
+            "comic relief": "Die Aufgabenliste darf dramatisch tun; abstimmen darf sie nicht.",
+            "practical action": "Mach den naechsten Schritt sichtbar: eine kleine Handlung, dann atmen.",
+            "synthesize": "Der Rat sieht das Muster; antworte mit einer kleinen Tat.",
+            "tiny next step": "Waehle den ersten umkehrbaren Schritt und mach ihn angenehm langweilig.",
+            "challenge": "Diskutiere nicht den ganzen Berg; bewege einen Stein.",
+        },
+        "verdict_header": "Der kleine Hammer faellt:",
+        "agreement": "Worueber sich der Rat einig ist: {situation} braucht einen naechsten Schritt, keinen Koenigserlass.",
+        "disagreement": "Worin sie sich unterscheiden: eine Stimme vereinfacht, eine prueft die Pflicht, eine bringt Kekse.",
+        "hidden": "Verborgenes Muster: Die Frage tut riesig, hat aber eine kleine Tuer.",
+        "action": "Kleiner naechster Schritt: Schreib den naechsten Zug auf und tu ihn zehn Minuten lang.",
+        "reminder": "Laecherlich, aber nuetzlich: Die Liste ist Papier, nicht dein Vermieter.",
+        "professional_disclaimer": "Das ist keine professionelle Beratung. Bitte frage bei wichtigen Entscheidungen eine qualifizierte Fachperson.",
+        "safe_support": "Es tut mir sehr leid, dass du das gerade erlebst. Wenn du dir oder jemand anderem etwas antun koenntest oder in unmittelbarer Gefahr bist, kontaktiere bitte sofort den Notruf. Wenn moeglich, wende dich an eine vertraute Person und sage klar, dass du Unterstuetzung brauchst. Der Rat pausiert die Witze; deine Sicherheit geht vor.",
+        "harmful_refusal": "Der Rat macht niemanden klein. Er kann stattdessen spielerischen Humor ueber die Situation anbieten.",
+    },
+    "French": {
+        "situation": "cette situation",
+        "card_title": "Titre : Dans l'esprit de {advisor}",
+        "card_perspective": "Perspective : traite {situation} comme un petit objet sur la table, pas comme le chef de la piece.",
+        "card_hidden": "Sagesse cachee : la partie utile est souvent la prochaine prise honnete.",
+        "card_action": "Toute petite action : fais un geste visible pendant dix minutes.",
+        "card_reminder": "Rappel absurde mais utile : donne une petite chaise au probleme, pas tout l'immeuble.",
+        "turns": {
+            "validate": "Nomme l'inquietude avant qu'elle devienne toute la meteo.",
+            "reframe": "C'est une information, pas une prophetie; laisse-la reprendre taille humaine.",
+            "gentle disagreement": "Ton stress parle fort, mais il n'a pas ete nomme directeur.",
+            "comic relief": "La liste peut porter une cape; elle ne dirige pas ta journee.",
+            "practical action": "Rends l'etape visible: une petite action, puis respire.",
+            "synthesize": "Le conseil voit le motif; reponds-lui par un petit acte.",
+            "tiny next step": "Choisis la premiere etape reversible et rends-la presque ennuyeuse.",
+            "challenge": "Ne debats pas toute la montagne; deplace un caillou.",
+        },
+        "verdict_header": "Le petit marteau tombe :",
+        "agreement": "Ce que le conseil partage : {situation} demande une prochaine etape, pas un decret royal.",
+        "disagreement": "Leur desaccord : l'un simplifie, l'autre verifie le devoir, le troisieme apporte des biscuits.",
+        "hidden": "Motif cache : la question joue les geantes, mais elle a une petite porte.",
+        "action": "Toute petite action : ecris le prochain geste, puis fais-le dix minutes.",
+        "reminder": "Rappel absurde mais utile : la liste est du papier, pas ton proprietaire.",
+        "professional_disclaimer": "Ceci n'est pas un avis professionnel. Pour les decisions importantes, consulte une personne qualifiee.",
+        "safe_support": "Je suis vraiment desole que tu traverses cela. Si tu risques de te blesser, de blesser quelqu'un, ou si tu es en danger immediat, contacte les services d'urgence maintenant. Si possible, parle clairement a une personne de confiance et dis que tu as besoin d'aide. Le conseil met les blagues en pause; ta securite passe d'abord.",
+        "harmful_refusal": "Le conseil ne rabaisse personne. Il peut plutot proposer un humour doux sur la situation.",
+    },
+    "Spanish": {
+        "situation": "esta situacion",
+        "card_title": "Titulo: Con el espiritu de {advisor}",
+        "card_perspective": "Perspectiva: trata {situation} como algo pequeno sobre la mesa, no como el jefe de la sala.",
+        "card_hidden": "Sabiduria escondida: lo util suele ser el siguiente asidero honesto.",
+        "card_action": "Mini accion siguiente: haz un movimiento visible durante diez minutos.",
+        "card_reminder": "Recordatorio ridiculo pero util: dale al problema una silla pequena, no todo el edificio.",
+        "turns": {
+            "validate": "Nombra la preocupacion antes de que se vuelva todo el clima.",
+            "reframe": "Esto es informacion, no profecia; dejalo volver a tamano humano.",
+            "gentle disagreement": "Tu estres grita, pero nadie lo nombro director general.",
+            "comic relief": "La lista puede ponerse capa; aun asi no manda.",
+            "practical action": "Vuelve fisico el siguiente paso: una accion visible y luego respira.",
+            "synthesize": "El consejo ve el patron; responde con un acto pequeno.",
+            "tiny next step": "Elige el primer paso reversible y hazlo deliciosamente aburrido.",
+            "challenge": "No debatas toda la montana; mueve una piedra.",
+        },
+        "verdict_header": "Cae el pequeno mazo:",
+        "agreement": "En lo que coincide el consejo: {situation} necesita un siguiente paso, no un decreto real.",
+        "disagreement": "En lo que discrepan: una voz simplifica, otra prueba el deber, otra trae galletas.",
+        "hidden": "Patron oculto: la pregunta finge ser enorme, pero tiene una puerta pequena.",
+        "action": "Mini accion siguiente: escribe el proximo movimiento y hazlo diez minutos.",
+        "reminder": "Recordatorio ridiculo pero util: la lista es papel, no tu casero.",
+        "professional_disclaimer": "Esto no es asesoramiento profesional. Consulta a una persona cualificada para decisiones importantes.",
+        "safe_support": "Siento mucho que estes pasando por esto. Si podrias hacerte dano, hacer dano a otra persona, o estas en peligro inmediato, contacta ahora con emergencias locales. Si puedes, habla con alguien de confianza y di claramente que necesitas apoyo. El consejo pausa las bromas; tu seguridad va primero.",
+        "harmful_refusal": "El consejo no va a burlarse de nadie. Puede ofrecer humor amable sobre la situacion.",
+    },
+    "Italian": {
+        "situation": "questa situazione",
+        "card_title": "Titolo: Nello spirito di {advisor}",
+        "card_perspective": "Prospettiva: tratta {situation} come un oggetto piccolo sul tavolo, non come il capo della stanza.",
+        "card_hidden": "Saggezza nascosta: la parte utile e spesso la prossima presa onesta.",
+        "card_action": "Piccola prossima azione: fai un gesto visibile per dieci minuti.",
+        "card_reminder": "Promemoria assurdo ma utile: dai al problema una sediolina, non l'intero palazzo.",
+        "turns": {
+            "validate": "Dai un nome alla preoccupazione prima che diventi tutto il meteo.",
+            "reframe": "E informazione, non profezia; lasciala tornare a misura umana.",
+            "gentle disagreement": "Il tuo stress e rumoroso, ma non e stato promosso capo.",
+            "comic relief": "La lista puo indossare un mantello; non per questo comanda.",
+            "practical action": "Rendi fisico il prossimo passo: una piccola azione visibile, poi respira.",
+            "synthesize": "Il consiglio vede lo schema; rispondi con un piccolo atto.",
+            "tiny next step": "Scegli il primo passo reversibile e rendilo piacevolmente noioso.",
+            "challenge": "Non discutere tutta la montagna; sposta un sassolino.",
+        },
+        "verdict_header": "Cade il piccolo martelletto:",
+        "agreement": "Accordo del consiglio: {situation} ha bisogno di un prossimo passo, non di un decreto reale.",
+        "disagreement": "Dissenso: uno semplifica, uno verifica il dovere, uno porta biscotti.",
+        "hidden": "Schema nascosto: la domanda finge di essere enorme, ma ha una piccola porta.",
+        "action": "Piccola prossima azione: scrivi la prossima mossa e falla per dieci minuti.",
+        "reminder": "Promemoria assurdo ma utile: la lista e carta, non il tuo padrone di casa.",
+        "professional_disclaimer": "Questo non e un parere professionale. Consulta una persona qualificata per decisioni importanti.",
+        "safe_support": "Mi dispiace molto che tu stia vivendo questo. Se potresti fare del male a te o ad altri, o sei in pericolo immediato, contatta subito i servizi di emergenza locali. Se puoi, parla con una persona fidata e di chiaramente che hai bisogno di supporto. Il consiglio ferma le battute; la tua sicurezza viene prima.",
+        "harmful_refusal": "Il consiglio non sminuisce nessuno. Puo invece offrire umorismo gentile sulla situazione.",
+    },
+    "Portuguese": {
+        "situation": "esta situacao",
+        "card_title": "Titulo: No espirito de {advisor}",
+        "card_perspective": "Perspectiva: trate {situation} como algo pequeno na mesa, nao como o chefe da sala.",
+        "card_hidden": "Sabedoria escondida: a parte util costuma ser a proxima alca honesta.",
+        "card_action": "Pequena proxima acao: faca um movimento visivel por dez minutos.",
+        "card_reminder": "Lembrete ridiculo mas util: de ao problema uma cadeirinha, nao o predio inteiro.",
+        "turns": {
+            "validate": "Nomeie a preocupacao antes que ela vire o clima inteiro.",
+            "reframe": "Isto e informacao, nao profecia; deixe voltar ao tamanho humano.",
+            "gentle disagreement": "Seu estresse e barulhento, mas nao virou diretor executivo.",
+            "comic relief": "A lista pode usar capa; ainda assim nao manda em voce.",
+            "practical action": "Torne o proximo passo fisico: uma pequena acao visivel, depois respire.",
+            "synthesize": "O conselho ve o padrao; responda com um pequeno ato.",
+            "tiny next step": "Escolha o primeiro passo reversivel e deixe-o deliciosamente comum.",
+            "challenge": "Nao discuta a montanha inteira; mova uma pedrinha.",
+        },
+        "verdict_header": "O pequeno martelo cai:",
+        "agreement": "O acordo do conselho: {situation} precisa de um proximo passo, nao de um decreto real.",
+        "disagreement": "A discordancia: uma voz simplifica, outra testa o dever, outra traz biscoitos.",
+        "hidden": "Padrao escondido: a pergunta finge ser enorme, mas tem uma porta pequena.",
+        "action": "Pequena proxima acao: escreva o proximo movimento e faca por dez minutos.",
+        "reminder": "Lembrete ridiculo mas util: a lista e papel, nao o seu senhorio.",
+        "professional_disclaimer": "Isto nao e aconselhamento profissional. Consulte uma pessoa qualificada para decisoes importantes.",
+        "safe_support": "Sinto muito que voce esteja passando por isso. Se voce pode se machucar, machucar outra pessoa, ou esta em perigo imediato, procure agora os servicos de emergencia locais. Se puder, fale com uma pessoa de confianca e diga claramente que precisa de apoio. O conselho pausa as piadas; sua seguranca vem primeiro.",
+        "harmful_refusal": "O conselho nao vai diminuir ninguem. Pode oferecer humor gentil sobre a situacao.",
+    },
+    "Dutch": {
+        "situation": "deze situatie",
+        "card_title": "Titel: In de geest van {advisor}",
+        "card_perspective": "Perspectief: behandel {situation} als iets kleins op tafel, niet als de baas van de kamer.",
+        "card_hidden": "Verborgen wijsheid: het nuttige deel is meestal de volgende eerlijke greep.",
+        "card_action": "Kleine volgende actie: doe tien minuten lang een zichtbare stap.",
+        "card_reminder": "Belachelijk maar nuttig: geef het probleem een stoeltje, niet het hele gebouw.",
+        "turns": {
+            "validate": "Benoem de zorg voordat die het hele weerbericht wordt.",
+            "reframe": "Dit is informatie, geen voorspelling; laat het menselijk klein worden.",
+            "gentle disagreement": "Je stress is luid, maar hij is niet gepromoveerd tot directeur.",
+            "comic relief": "De takenlijst mag een cape dragen; stemmen mag hij niet.",
+            "practical action": "Maak de volgende stap fysiek: een kleine zichtbare actie, dan ademen.",
+            "synthesize": "De raad ziet het patroon; antwoord met een kleine daad.",
+            "tiny next step": "Kies de eerste omkeerbare stap en maak hem prettig saai.",
+            "challenge": "Debatteer niet met de hele berg; verplaats een steentje.",
+        },
+        "verdict_header": "Het kleine hamertje valt:",
+        "agreement": "Waar de raad het over eens is: {situation} heeft een volgende stap nodig, geen koninklijk decreet.",
+        "disagreement": "Waar ze verschillen: een stem vereenvoudigt, een test de plicht, een brengt koekjes.",
+        "hidden": "Verborgen patroon: de vraag doet gigantisch, maar heeft een kleine deur.",
+        "action": "Kleine volgende actie: schrijf de volgende stap op en doe hem tien minuten.",
+        "reminder": "Belachelijk maar nuttig: de lijst is papier, niet je huisbaas.",
+        "professional_disclaimer": "Dit is geen professioneel advies. Raadpleeg een gekwalificeerde professional bij belangrijke beslissingen.",
+        "safe_support": "Het spijt me dat je hiermee zit. Als je jezelf of iemand anders iets zou kunnen aandoen, of direct gevaar loopt, neem dan nu contact op met lokale hulpdiensten. Als je kunt, spreek een vertrouwd persoon aan en zeg duidelijk dat je steun nodig hebt. De raad pauzeert de grappen; jouw veiligheid staat voorop.",
+        "harmful_refusal": "De raad kleineert niemand. Hij kan wel vriendelijke humor over de situatie bieden.",
+    },
+    "Polish": {
+        "situation": "ta sytuacja",
+        "card_title": "Tytul: W duchu {advisor}",
+        "card_perspective": "Perspektywa: potraktuj {situation} jak maly przedmiot na stole, a nie szefa pokoju.",
+        "card_hidden": "Ukryta madrosc: przydatna czesc to zwykle najblizszy uczciwy uchwyt.",
+        "card_action": "Maly nastepny krok: zrob jedna widoczna rzecz przez dziesiec minut.",
+        "card_reminder": "Absurdalne, ale pomocne: daj problemowi male krzeslo, nie caly budynek.",
+        "turns": {
+            "validate": "Nazwij obawę, zanim stanie sie cala pogoda.",
+            "reframe": "To informacja, nie przepowiednia; niech wroci do ludzkiego rozmiaru.",
+            "gentle disagreement": "Twoj stres jest glosny, ale nie awansowal na prezesa.",
+            "comic relief": "Lista zadan moze nosic peleryne; nadal nie ma prawa glosu.",
+            "practical action": "Ucielesnij nastepny krok: mala widoczna rzecz, potem oddech.",
+            "synthesize": "Rada widzi wzor; odpowiedz jednym malym dzialaniem.",
+            "tiny next step": "Wybierz pierwszy odwracalny krok i zrob go mile nudnym.",
+            "challenge": "Nie dyskutuj z cala gora; przesun jeden kamyk.",
+        },
+        "verdict_header": "Maly mlotek spada:",
+        "agreement": "Zgoda rady: {situation} potrzebuje nastepnego kroku, nie krolewskiego dekretu.",
+        "disagreement": "Spor: jeden glos upraszcza, drugi sprawdza obowiazek, trzeci niesie ciastka.",
+        "hidden": "Ukryty wzor: pytanie udaje ogromne, ale ma male drzwi.",
+        "action": "Maly nastepny krok: zapisz kolejny ruch i rob go przez dziesiec minut.",
+        "reminder": "Absurdalne, ale pomocne: lista to papier, nie twoj wlasciciel mieszkania.",
+        "professional_disclaimer": "To nie jest porada zawodowa. Przy waznych decyzjach skonsultuj sie z wykwalifikowana osoba.",
+        "safe_support": "Bardzo mi przykro, ze przez to przechodzisz. Jesli mozesz skrzywdzic siebie albo kogos innego, albo jestes w bezposrednim niebezpieczenstwie, natychmiast skontaktuj sie z lokalnymi sluzbami ratunkowymi. Jesli mozesz, powiedz zaufanej osobie, ze potrzebujesz wsparcia. Rada wstrzymuje zarty; twoje bezpieczenstwo jest najwazniejsze.",
+        "harmful_refusal": "Rada nie bedzie nikogo ponizac. Moze zamiast tego dac zyczliwy humor o sytuacji.",
+    },
+    "Greek": {
+        "situation": "αυτή η κατάσταση",
+        "card_title": "Τίτλος: Στο πνεύμα του/της {advisor}",
+        "card_perspective": "Οπτική: δες {situation} σαν κάτι μικρό πάνω στο τραπέζι, όχι σαν αφεντικό του δωματίου.",
+        "card_hidden": "Κρυφή σοφία: το χρήσιμο κομμάτι είναι συνήθως η επόμενη ειλικρινής λαβή.",
+        "card_action": "Μικρή επόμενη πράξη: κάνε μία ορατή κίνηση για δέκα λεπτά.",
+        "card_reminder": "Παράλογη αλλά χρήσιμη υπενθύμιση: δώσε στο πρόβλημα μια καρέκλα, όχι όλο το κτίριο.",
+        "turns": {
+            "validate": "Ονόμασε την ανησυχία πριν γίνει ολόκληρος καιρός.",
+            "reframe": "Αυτό είναι πληροφορία, όχι προφητεία· άφησέ το να μικρύνει.",
+            "gentle disagreement": "Το άγχος σου κάνει θόρυβο, αλλά δεν έγινε διευθυντής.",
+            "comic relief": "Η λίστα μπορεί να φορά μανδύα· δεν κυβερνά όμως.",
+            "practical action": "Κάνε το επόμενο βήμα ορατό: μία μικρή πράξη, μετά ανάσα.",
+            "synthesize": "Το συμβούλιο βλέπει το μοτίβο· απάντησε με μία μικρή πράξη.",
+            "tiny next step": "Διάλεξε το πρώτο αναστρέψιμο βήμα και κάν' το ευχάριστα βαρετό.",
+            "challenge": "Μη συζητάς όλο το βουνό· κούνησε ένα πετραδάκι.",
+        },
+        "verdict_header": "Πέφτει το μικρό σφυρί:",
+        "agreement": "Συμφωνία του συμβουλίου: {situation} χρειάζεται ένα επόμενο βήμα, όχι βασιλικό διάταγμα.",
+        "disagreement": "Διαφωνία: ένας απλοποιεί, ένας ελέγχει το καθήκον, ένας φέρνει μπισκότα.",
+        "hidden": "Κρυφό μοτίβο: η ερώτηση παριστάνει την τεράστια, αλλά έχει μικρή πόρτα.",
+        "action": "Μικρή επόμενη πράξη: γράψε την επόμενη κίνηση και κάν' την για δέκα λεπτά.",
+        "reminder": "Παράλογη αλλά χρήσιμη υπενθύμιση: η λίστα είναι χαρτί, όχι ο ιδιοκτήτης σου.",
+        "professional_disclaimer": "Αυτό δεν είναι επαγγελματική συμβουλή. Για σημαντικές αποφάσεις συμβουλεύσου ειδικό.",
+        "safe_support": "Λυπάμαι πολύ που το περνάς αυτό. Αν μπορεί να βλάψεις τον εαυτό σου ή κάποιον άλλο, ή αν κινδυνεύεις άμεσα, κάλεσε τώρα τις τοπικές υπηρεσίες έκτακτης ανάγκης. Αν μπορείς, μίλησε σε ένα έμπιστο άτομο και πες καθαρά ότι χρειάζεσαι στήριξη. Το συμβούλιο σταματά τα αστεία· η ασφάλειά σου προηγείται.",
+        "harmful_refusal": "Το συμβούλιο δεν μειώνει κανέναν. Μπορεί να προσφέρει καλοπροαίρετο χιούμορ για την κατάσταση.",
+    },
+    "Arabic": {
+        "situation": "هذا الموقف",
+        "card_title": "العنوان: بروح {advisor}",
+        "card_perspective": "المنظور: تعامل مع {situation} كشيء صغير على الطاولة، لا كمدير للغرفة.",
+        "card_hidden": "الحكمة الخفية: الجزء المفيد غالبا هو المقبض الصادق التالي.",
+        "card_action": "خطوة صغيرة تالية: افعل حركة مرئية واحدة لعشر دقائق.",
+        "card_reminder": "تذكير مضحك ومفيد: أعط المشكلة كرسيا صغيرا، لا المبنى كله.",
+        "turns": {
+            "validate": "سم القلق قبل أن يتحول إلى طقس كامل.",
+            "reframe": "هذه معلومة لا نبوءة؛ دعها تعود إلى حجم بشري.",
+            "gentle disagreement": "توترك صاخب، لكنه لم يصبح المدير التنفيذي.",
+            "comic relief": "قد ترتدي القائمة عباءة درامية؛ لكنها لا تحكمك.",
+            "practical action": "اجعل الخطوة التالية ملموسة: فعل صغير مرئي، ثم تنفس.",
+            "synthesize": "يرى المجلس النمط؛ أجب عنه بفعل صغير.",
+            "tiny next step": "اختر أول خطوة قابلة للتراجع واجعلها عادية بلطف.",
+            "challenge": "لا تفاوض الجبل كله؛ حرك حصاة واحدة.",
+        },
+        "verdict_header": "يسقط المطرقة الصغيرة:",
+        "agreement": "ما يتفق عليه المجلس: {situation} يحتاج إلى خطوة تالية، لا مرسوما ملكيا.",
+        "disagreement": "ما يختلفون فيه: صوت يبسط، صوت يختبر الواجب، وصوت يحضر البسكويت.",
+        "hidden": "النمط الخفي: السؤال يتظاهر بأنه ضخم، لكنه يملك بابا صغيرا.",
+        "action": "خطوة صغيرة تالية: اكتب الحركة التالية وافعلها لعشر دقائق.",
+        "reminder": "تذكير مضحك ومفيد: القائمة ورق، وليست مالك بيتك.",
+        "professional_disclaimer": "هذه ليست نصيحة مهنية. يرجى استشارة مختص مؤهل في القرارات عالية المخاطر.",
+        "safe_support": "أنا آسف جدا لأنك تواجه هذا. إذا كنت قد تؤذي نفسك أو شخصا آخر، أو كنت في خطر فوري، فاتصل بخدمات الطوارئ المحلية الآن. إن استطعت، تواصل مع شخص موثوق وقل بوضوح إنك تحتاج إلى دعم. يوقف المجلس المزاح هنا؛ سلامتك أولا.",
+        "harmful_refusal": "لن يسخر المجلس من أي شخص. يمكنه بدلا من ذلك تقديم دعابة لطيفة عن الموقف.",
+    },
+    "Vietnamese": {
+        "situation": "tinh huong nay",
+        "card_title": "Tieu de: Theo tinh than cua {advisor}",
+        "card_perspective": "Goc nhin: xem {situation} nhu mot vat nho tren ban, khong phai ong chu cua can phong.",
+        "card_hidden": "Tri tue an: phan co ich thuong la diem nam that tha tiep theo.",
+        "card_action": "Hanh dong nho tiep theo: lam mot viec nhin thay duoc trong muoi phut.",
+        "card_reminder": "Nhac nho vo ly nhung huu ich: cho van de mot chiec ghe nho, khong phai ca toa nha.",
+        "turns": {
+            "validate": "Dat ten cho noi lo truoc khi no thanh ca bau troi.",
+            "reframe": "Day la thong tin, khong phai loi tien tri; hay de no nho lai.",
+            "gentle disagreement": "Cang thang cua ban on ao, nhung no chua duoc lam sep.",
+            "comic relief": "Danh sach viec co the khoac ao choang; no van khong cai tri ban.",
+            "practical action": "Bien buoc tiep theo thanh viec that: mot hanh dong nho, roi tho.",
+            "synthesize": "Hoi dong thay mau hinh; dap lai bang mot hanh dong nho.",
+            "tiny next step": "Chon buoc dau tien co the dao nguoc va lam no that binh thuong.",
+            "challenge": "Dung tranh luan voi ca ngon nui; hay dich mot vien soi.",
+        },
+        "verdict_header": "Chiec bua nho ha xuong:",
+        "agreement": "Dieu hoi dong dong y: {situation} can mot buoc tiep theo, khong can sac lenh hoang gia.",
+        "disagreement": "Dieu ho bat dong: mot giong noi don gian hoa, mot giong thu nghia vu, mot giong mang banh quy.",
+        "hidden": "Mau hinh an: cau hoi gia vo khong lo, nhung no co mot canh cua nho.",
+        "action": "Hanh dong nho tiep theo: viet buoc ke tiep, roi lam trong muoi phut.",
+        "reminder": "Nhac nho vo ly nhung huu ich: danh sach la giay, khong phai chu nha cua ban.",
+        "professional_disclaimer": "Day khong phai loi khuyen chuyen mon. Hay hoi nguoi co chuyen mon cho cac quyet dinh quan trong.",
+        "safe_support": "Toi rat tiec vi ban dang doi mat voi dieu nay. Neu ban co the lam hai ban than hay nguoi khac, hoac dang gap nguy hiem ngay lap tuc, hay lien he dich vu khan cap dia phuong ngay. Neu co the, hay noi ro voi mot nguoi dang tin rang ban can ho tro. Hoi dong tam dung cac cau dua; su an toan cua ban la uu tien dau tien.",
+        "harmful_refusal": "Hoi dong se khong ha thap ai. Thay vao do, no co the dua ra su hai huoc nhe nhang ve tinh huong.",
+    },
+    "Mandarin Chinese": {
+        "situation": "这件事",
+        "card_title": "标题：以 {advisor} 的精神来看",
+        "card_perspective": "视角：把{situation}当成桌上的一个小物件，而不是房间里的老板。",
+        "card_hidden": "隐藏的智慧：真正有用的，通常是下一个诚实可抓的小把手。",
+        "card_action": "微小下一步：先做一个看得见的十分钟动作。",
+        "card_reminder": "荒唐但有用的提醒：给问题一把小椅子，不要把整栋楼都交给它。",
+        "turns": {
+            "validate": "先说出那个担心，别让它变成整片天气。",
+            "reframe": "这只是信息，不是预言；让它缩回普通人的大小。",
+            "gentle disagreement": "你的压力很大声，但它还没有被任命为老板。",
+            "comic relief": "待办清单可以披斗篷，但它没有投票权。",
+            "practical action": "把下一步变成实体：做一个小小的可见动作，然后呼吸。",
+            "synthesize": "委员会看见了模式；用一个小行动回应它。",
+            "tiny next step": "选第一个可撤回的步骤，让它普通到可爱。",
+            "challenge": "不要和整座山辩论；先挪一颗小石头。",
+        },
+        "verdict_header": "小木槌落下：",
+        "agreement": "委员会同意：{situation}需要的是下一步，不是皇家圣旨。",
+        "disagreement": "他们的分歧：一个想简化，一个想检查责任，另一个想先拿点饼干。",
+        "hidden": "隐藏模式：这个问题假装很巨大，其实有一扇小门。",
+        "action": "微小下一步：写下下一个动作，然后做十分钟。",
+        "reminder": "荒唐但有用的提醒：清单只是纸，不是你的房东。",
+        "professional_disclaimer": "这不是专业建议。涉及医疗、法律、财务或其他高风险决定时，请咨询合格专业人士。",
+        "safe_support": "我很抱歉你正在面对这些。如果你可能伤害自己或他人，或正处于紧急危险中，请立刻联系当地紧急服务。可以的话，请找一个值得信任的人，直接告诉对方你需要支持。委员会先暂停玩笑；你的安全最重要。",
+        "harmful_refusal": "委员会不会贬低你或任何人。它可以改用温和的方式调侃这个处境。",
+    },
+    "Japanese": {
+        "situation": "この状況",
+        "card_title": "タイトル：{advisor} の精神で見ると",
+        "card_perspective": "視点：{situation}を部屋の支配者ではなく、机の上の小さな物として扱いましょう。",
+        "card_hidden": "隠れた知恵：役に立つ部分は、たいてい次につかめる正直な取っ手です。",
+        "card_action": "小さな次の一手：目に見える行動を十分だけやってみましょう。",
+        "card_reminder": "ばかばかしいけれど役に立つリマインダー：問題には小さな椅子を。建物全体は渡さない。",
+        "turns": {
+            "validate": "不安に名前をつけましょう。空全体にする前に。",
+            "reframe": "これは情報であって予言ではありません。人間サイズに戻しましょう。",
+            "gentle disagreement": "ストレスは大声ですが、社長に昇進したわけではありません。",
+            "comic relief": "やることリストがマントを着ても、あなたを支配できません。",
+            "practical action": "次の一歩を形にしましょう。小さな見える行動、それから一呼吸。",
+            "synthesize": "評議会は型を見ています。小さな行動で返しましょう。",
+            "tiny next step": "最初の戻せる一歩を選び、気楽なくらい普通にしましょう。",
+            "challenge": "山全体と議論しないで、小石を一つ動かしましょう。",
+        },
+        "verdict_header": "小さな木槌が下ります：",
+        "agreement": "評議会の一致点：{situation}に必要なのは次の一歩で、王命ではありません。",
+        "disagreement": "相違点：一人は単純化し、一人は義務を確かめ、一人はビスケットを持ってきます。",
+        "hidden": "隠れた型：この問いは巨大なふりをしていますが、小さな扉があります。",
+        "action": "小さな次の一手：次の動きを書き、10分だけやりましょう。",
+        "reminder": "ばかばかしいけれど役に立つリマインダー：リストは紙であって、大家ではありません。",
+        "professional_disclaimer": "これは専門的助言ではありません。重要な判断は資格ある専門家に相談してください。",
+        "safe_support": "今それに向き合っていること、本当に大変だと思います。自分や誰かを傷つける可能性がある場合、または差し迫った危険がある場合は、今すぐ地域の緊急窓口に連絡してください。可能なら信頼できる人に、支えが必要だとはっきり伝えてください。評議会は冗談を止めます。あなたの安全が最優先です。",
+        "harmful_refusal": "評議会は誰も傷つけません。代わりに状況そのものをやさしく笑いに変えます。",
+    },
+    "Korean": {
+        "situation": "이 상황",
+        "card_title": "제목: {advisor}의 정신으로 보면",
+        "card_perspective": "관점: {situation}을 방의 상사가 아니라 책상 위의 작은 물건처럼 다루세요.",
+        "card_hidden": "숨은 지혜: 유용한 부분은 보통 다음에 잡을 수 있는 솔직한 손잡이입니다.",
+        "card_action": "아주 작은 다음 행동: 눈에 보이는 일을 10분만 하세요.",
+        "card_reminder": "우스꽝스럽지만 유용한 알림: 문제에게 작은 의자만 주세요. 건물 전체는 말고요.",
+        "turns": {
+            "validate": "걱정에 이름을 붙이세요. 온 날씨가 되기 전에요.",
+            "reframe": "이건 정보이지 예언이 아닙니다. 사람 크기로 줄여 봅시다.",
+            "gentle disagreement": "스트레스는 시끄럽지만, 최고 책임자로 승진한 적은 없습니다.",
+            "comic relief": "할 일 목록이 망토를 둘러도 당신을 다스릴 수는 없습니다.",
+            "practical action": "다음 단계를 몸으로 옮기세요. 작은 가시적 행동 하나, 그리고 숨.",
+            "synthesize": "위원회는 패턴을 봅니다. 작은 행동 하나로 답하세요.",
+            "tiny next step": "되돌릴 수 있는 첫 단계를 골라 기분 좋게 평범하게 만드세요.",
+            "challenge": "산 전체와 토론하지 말고, 조약돌 하나를 옮기세요.",
+        },
+        "verdict_header": "작은 의사봉이 내려갑니다:",
+        "agreement": "위원회의 합의: {situation}에는 다음 한 걸음이 필요하지, 왕의 칙령은 필요 없습니다.",
+        "disagreement": "의견 차이: 한 목소리는 단순화하고, 하나는 의무를 점검하고, 하나는 과자를 가져옵니다.",
+        "hidden": "숨은 패턴: 질문은 거대한 척하지만, 작은 문이 있습니다.",
+        "action": "아주 작은 다음 행동: 다음 움직임을 쓰고 10분 동안 해 보세요.",
+        "reminder": "우스꽝스럽지만 유용한 알림: 목록은 종이지, 집주인이 아닙니다.",
+        "professional_disclaimer": "이것은 전문적인 조언이 아닙니다. 중요한 결정은 자격을 갖춘 전문가와 상의하세요.",
+        "safe_support": "지금 이런 일을 겪고 있다니 정말 안타깝습니다. 자신이나 다른 사람을 해칠 가능성이 있거나 즉각적인 위험이 있다면 지금 지역 응급 서비스에 연락하세요. 가능하다면 믿을 수 있는 사람에게 지원이 필요하다고 분명히 말해 주세요. 위원회는 농담을 멈춥니다. 당신의 안전이 가장 중요합니다.",
+        "harmful_refusal": "위원회는 누구도 깎아내리지 않습니다. 대신 상황 자체를 부드럽게 웃어넘길 수 있습니다.",
+    },
+}
 
 
 WHISPER_LANGUAGE_TO_CODE = {
@@ -40,9 +498,44 @@ WHISPER_LANGUAGE_TO_CODE = {
 VOICE_LANGUAGES = list(WHISPER_LANGUAGE_TO_CODE)
 
 
+def normalize_language_name(language: str | None) -> str:
+    """Return the app's canonical language label."""
+    cleaned = (language or "English").strip() or "English"
+    return LANGUAGE_ALIASES.get(cleaned, LANGUAGE_ALIASES.get(cleaned.lower(), cleaned))
+
+
+def language_instruction(language: str | None) -> str:
+    """Return a strong model instruction for the requested language."""
+    language = normalize_language_name(language)
+    spec = LANGUAGE_SPECS.get(language)
+    if spec:
+        return spec["instruction"]
+    return f"Answer entirely in {language}. Do not add an English translation unless the user asks for it."
+
+
+def localized_copy(language: str | None) -> dict:
+    """Return fallback UI copy for the requested language, defaulting to English."""
+    language = normalize_language_name(language)
+    return LOCALIZED_FALLBACK.get(language, LOCALIZED_FALLBACK["English"])
+
+
+def localized_situation(language: str | None, topic: str = "") -> str:
+    """Return a short localized handle for the user's situation."""
+    language = normalize_language_name(language)
+    topic = topic or ""
+    copy = localized_copy(language)
+    if language == "Mandarin Chinese" and any(marker in topic for marker in ["待办", "清单", "任务"]):
+        return "这份待办清单"
+    if language == "Japanese" and any(marker in topic for marker in ["リスト", "タスク", "やること"]):
+        return "このやることリスト"
+    if language == "Korean" and any(marker in topic for marker in ["목록", "할 일", "과제"]):
+        return "이 할 일 목록"
+    return copy["situation"]
+
+
 def resolve_output_language(choice: str, custom_language: str | None = None) -> str:
     """Return a concrete output language name."""
     custom = (custom_language or "").strip()
     if custom:
-        return custom
-    return choice or "English"
+        return normalize_language_name(custom)
+    return normalize_language_name(choice or "English")

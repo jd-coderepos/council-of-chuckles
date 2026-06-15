@@ -119,6 +119,30 @@ def check_app_fallback() -> None:
         fail(f"Expected fallback status, got: {status}")
     if not output_html or not verdict_html:
         fail("Expected generated council output and verdict HTML")
+    mandarin_result = app.generate(
+        "我的待办事项清单写得太长了，现在感觉它才是我的老板。我应该从哪里开始？",
+        app.DEFAULT_SELECTED_IDS,
+        "Mandarin Chinese",
+        "",
+        "Campfire Council Mode",
+        "Match to my topic",
+        3,
+        [],
+        "Gentle campfire",
+        6,
+        3,
+        5,
+        True,
+        True,
+        False,
+        [],
+        "Mandarin Chinese",
+    )
+    mandarin_html = mandarin_result[0]
+    if "Fallback English" in mandarin_html or "English-only" in mandarin_html:
+        fail("Mandarin fallback must not use English-only fallback copy")
+    if not re.search(r"[\u4e00-\u9fff]", mandarin_html):
+        fail("Mandarin fallback should contain Chinese text")
     ok("app imports and fallback council generation works")
 
 

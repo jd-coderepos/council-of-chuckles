@@ -25,6 +25,36 @@ TEXT_MODEL_ID = os.getenv("TEXT_MODEL_ID", "CohereLabs/tiny-aya-water")
 ENABLE_ENGLISH_FALLBACK_MODEL = os.getenv("ENABLE_ENGLISH_FALLBACK_MODEL", "false").lower() == "true"
 ENGLISH_FALLBACK_MODEL_ID = os.getenv("ENGLISH_FALLBACK_MODEL_ID", "openbmb/MiniCPM5-1B")
 
+
+def _encode_chat_prompt(tokenizer, prompt: str):
+    """Format prompts the way chat-tuned Tiny Aya expects."""
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        encoded = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+        )
+        if isinstance(encoded, dict):
+            return encoded
+        return {"input_ids": encoded}
+    except Exception:
+        return tokenizer(prompt, return_tensors="pt")
+
+
+def _move_inputs_to_model(inputs: dict, model) -> dict:
+    device = getattr(model, "device", None)
+    if not device:
+        return inputs
+    return {key: value.to(device) for key, value in inputs.items()}
+
+
+def _decode_new_tokens(tokenizer, output, prompt_length: int) -> str:
+    new_tokens = output[0][prompt_length:]
+    return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+
 def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
     """Trim small-model over-generation and recover advisor dialogue lines.
 
@@ -33,7 +63,7 @@ def clean_generation(text: str, max_dialogue_lines: int = 8) -> str:
     - **Socrates:** 
       advice here
     """
-    text = (text or "").strip()
+    text = (text or "").replace("：", ":").strip()
     text = text.replace("```", "").strip()
     text = text.strip("-").strip()
 
@@ -181,7 +211,12 @@ def load_text_model(model_id: str = TEXT_MODEL_ID):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+    if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
+        dtype = torch.bfloat16
+    elif torch.cuda.is_available():
+        dtype = torch.float16
+    else:
+        dtype = torch.float32
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -202,20 +237,18 @@ def generate_text(
     """Generate text or return a fallback status on failure."""
     try:
         tokenizer, model = load_text_model(TEXT_MODEL_ID)
-        inputs = tokenizer(prompt, return_tensors="pt")
-        if getattr(model, "device", None):
-            inputs = {key: value.to(model.device) for key, value in inputs.items()}
-        output = model.generate(
-            **inputs,
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            temperature=temperature,
-            top_p=0.9,
-            repetition_penalty=1.05,
-            pad_token_id=tokenizer.eos_token_id,
-        )
-        decoded = tokenizer.decode(output[0], skip_special_tokens=True)
-        text = decoded[len(prompt) :].strip() if decoded.startswith(prompt) else decoded.strip()
+        inputs = _move_inputs_to_model(_encode_chat_prompt(tokenizer, prompt), model)
+        generation_kwargs = {
+            "max_new_tokens": max_new_tokens,
+            "do_sample": True,
+            "temperature": temperature,
+            "top_p": 0.9,
+            "repetition_penalty": 1.05,
+        }
+        if tokenizer.eos_token_id is not None:
+            generation_kwargs["pad_token_id"] = tokenizer.eos_token_id
+        output = model.generate(**inputs, **generation_kwargs)
+        text = _decode_new_tokens(tokenizer, output, inputs["input_ids"].shape[-1])
         if clean_mode == "dialogue":
             text = clean_generation(text)
         elif clean_mode == "verdict":
@@ -229,12 +262,10 @@ def generate_text(
         if ENABLE_ENGLISH_FALLBACK_MODEL:
             try:
                 tokenizer, model = load_text_model(ENGLISH_FALLBACK_MODEL_ID)
-                inputs = tokenizer(prompt, return_tensors="pt")
-                if getattr(model, "device", None):
-                    inputs = {key: value.to(model.device) for key, value in inputs.items()}
+                inputs = _move_inputs_to_model(_encode_chat_prompt(tokenizer, prompt), model)
                 output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=True, temperature=temperature)
-                decoded = tokenizer.decode(output[0], skip_special_tokens=True)
-                return clean_generation(decoded.strip()), f"Model mode: English fallback ({ENGLISH_FALLBACK_MODEL_ID})"
+                decoded = _decode_new_tokens(tokenizer, output, inputs["input_ids"].shape[-1])
+                return clean_generation(decoded), f"Model mode: English fallback ({ENGLISH_FALLBACK_MODEL_ID})"
             except Exception:
                 pass
         return "", f"Fallback mode active: {exc.__class__.__name__}"

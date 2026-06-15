@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .languages import localized_copy
+
 
 CRISIS_KEYWORDS = [
     "suicide",
@@ -94,18 +96,8 @@ def detect_harmful_humor_request(text: str) -> bool:
 
 
 def safe_support_response(language: str = "English") -> str:
-    return (
-        "I am really sorry you are facing this. If you might hurt yourself or someone else, "
-        "or if you are in immediate danger, please contact local emergency services now. "
-        "If you can, reach out to a trusted person and tell them plainly that you need support. "
-        "If you are in the United States or Canada, call or text 988 for crisis support. "
-        "The council pauses the jokes here; your safety matters first."
-    )
+    return localized_copy(language)["safe_support"]
 
 
 def professional_disclaimer(language: str = "English") -> str:
-    return (
-        "This is not professional advice. Please consult a qualified professional for decisions "
-        "about medical, legal, financial, immigration, tax, or similar high-stakes matters."
-    )
-
+    return localized_copy(language)["professional_disclaimer"]

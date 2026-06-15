@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .languages import language_instruction
+
 
 SYSTEM_INSTRUCTION = (
     "You are Council of Chuckles, a whimsical but compassionate multilingual small-model app. "
@@ -10,6 +12,14 @@ SYSTEM_INSTRUCTION = (
     "perspective, and optional humor. Humor must never be cruel, hateful, discriminatory, or "
     "dismissive of crisis. Answer in the requested output language."
 )
+
+
+def advisor_voice(advisor: dict, mode: str) -> str:
+    """Return the best available voice brief for the response mode."""
+    if mode == "Comic Relief Mode":
+        return advisor.get("jokester_voice") or advisor.get("comic_voice") or advisor.get("mastermind_voice", "")
+    return advisor.get("mastermind_voice") or advisor.get("jokester_voice", "")
+
 
 def humor_brief(humor_intensity: int, compassion_level: int) -> str:
     """Return safe humor instructions tuned by the UI sliders.
@@ -53,6 +63,7 @@ def humor_brief(humor_intensity: int, compassion_level: int) -> str:
 
 def advisor_prompt(
     topic: str,
+    input_language: str,
     output_language: str,
     mode: str,
     humor_intensity: int,
@@ -60,7 +71,7 @@ def advisor_prompt(
     analysis: dict,
     advisor: dict,
 ) -> str:
-    voice = advisor.get("comic_voice") if mode == "Comic Relief Mode" else advisor.get("mastermind_voice")
+    voice = advisor_voice(advisor, mode)
     return f"""SYSTEM:
 {SYSTEM_INSTRUCTION}
 
@@ -98,17 +109,16 @@ Avoid: {advisor.get('avoid')}
 TASK:
 Generate an original response inspired by this advisor.
 Do not claim this is a real quote.
-Answer entirely in {output_language}.
-Use this exact structure:
-Title:
-Perspective:
-Hidden wisdom:
-Tiny next action:
+The user's question is written in {input_language}.
+{language_instruction(output_language)}
+Write four short labeled lines. Localize the labels into {output_language}.
+Cover: title, perspective, hidden wisdom, and one tiny next action.
 """
 
 
 def council_prompt(
     topic: str,
+    input_language: str,
     output_language: str,
     mode: str,
     humor_intensity: int,
@@ -125,7 +135,9 @@ def council_prompt(
 {SYSTEM_INSTRUCTION}
 
 Topic: {topic}
+Input language: {input_language}
 Language: {output_language}
+Language rule: {language_instruction(output_language)}
 Mode: {mode}
 Humor: {humor_intensity}/5
 Compassion: {compassion_level}/5
@@ -136,13 +148,15 @@ Needs: {', '.join(analysis.get('needs', []))}
 Active advisor profiles:
 {profiles}
 
-Write compact advisor cards. Each card must begin with "Inspired by [Name]".
-End with a short "The Gavel Falls" verdict.
+Write compact advisor cards in {output_language}.
+Keep advisor names exactly as listed.
+End with a short localized final verdict in {output_language}.
 """
 
 
 def campfire_prompt(
     topic: str,
+    input_language: str,
     output_language: str,
     humor_intensity: int,
     compassion_level: int,
@@ -151,7 +165,7 @@ def campfire_prompt(
     dialogue_plan: dict,
 ) -> str:
     profiles = "\n".join(
-        f"- {advisor['name']}: {advisor.get('role')} | {', '.join(advisor.get('archetypes', []))} | {advisor.get('comic_voice')}"
+        f"- {advisor['name']}: {advisor.get('role')} | {', '.join(advisor.get('archetypes', []))} | {advisor_voice(advisor, 'Comic Relief Mode')}"
         for advisor in active_speakers
     )
     turns = "\n".join(
@@ -165,7 +179,9 @@ def campfire_prompt(
 {SYSTEM_INSTRUCTION}
 
 User topic: {topic}
+Input language: {input_language}
 Output language: {output_language}
+Language rule: {language_instruction(output_language)}
 Humor intensity: {humor_intensity}/5
 Compassion: {compassion_level}/5
 Humor guidance: {humor_guidance}
@@ -182,6 +198,8 @@ Write exactly {len(dialogue_plan.get("turn_order", []))} dialogue lines, followi
 Do not use Markdown, bullets, bold text, or section headings.
 Each dialogue line must be on one line only, in this exact format:
 Advisor Name: one concise sentence
+Keep each advisor name exactly as listed in the dialogue plan, followed by a normal colon.
+Write the advice sentence after the colon in {output_language}.
 Each line must directly address the user's topic.
 Each line must include a useful reframe or tiny action, phrased through a comic lens.
 Use the user's own words as comic material when safe, such as "bananas", "purple buttons", or "deadline gremlin".
@@ -193,4 +211,3 @@ Do not explain the metaphor. Do not write inspirational paragraphs, therapy-spea
 Do not write "The Gavel Falls"; the app generates the final verdict separately.
 Output only the advisor dialogue lines.
 """
-

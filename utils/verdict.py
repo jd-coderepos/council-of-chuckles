@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import re
 
+from .languages import language_instruction, localized_copy, localized_situation
+
 
 STOPWORDS = {
     "about",
@@ -108,6 +110,7 @@ def build_verdict_prompt_or_template(
     topic: str,
     analysis: dict,
     active_speakers: list[dict],
+    input_language: str,
     output_language: str,
     council_discussion: str = "",
     humor_intensity: int = 3,
@@ -139,9 +142,12 @@ def build_verdict_prompt_or_template(
     )
 
     return f"""Write a comic final lens in {output_language}, based on the user's question and the council discussion.
+{language_instruction(output_language)}
 
 User question:
 {topic}
+
+Input language: {input_language}
 
 Council discussion:
 {council_discussion}
@@ -180,48 +186,13 @@ Ridiculous but useful reminder: <the funniest kind image from the user's situati
 
 
 def fallback_verdict(topic: str, analysis: dict, active_speakers: list[dict], output_language: str) -> str:
-    needs = analysis.get("needs", ["clarity"])
-    themes = analysis.get("themes", ["uncertainty"])
-    emotions = analysis.get("emotions", ["confusion"])
-    need = needs[0] if needs else "clarity"
-    theme = themes[0] if themes else "uncertainty"
-    emotion = emotions[0] if emotions else "confusion"
-    handle = _topic_handle(topic, theme)
-    seed = "|".join([topic, theme, need, ",".join(advisor.get("name", "") for advisor in active_speakers)])
-    agreement = _pick(
-        [
-            f"{handle.title()} needs {need}, not a courtroom with snacks.",
-            f"{handle.title()} is real, but it is asking for {need}, not a royal decree.",
-            f"The useful move is to make {handle} smaller, kinder, and less fog-machine-shaped.",
-            f"The council sees {emotion}; the answer is one concrete step, not a dramatic weather report.",
-        ],
-        seed,
-    )
-    hidden = _pick(
-        [
-            f"{theme.title()} is trying to wear the manager badge, while {need} is doing the actual work.",
-            f"The noisy part is {emotion}; the useful part is the next ordinary handle you can grab.",
-            f"The question is pretending to be huge, but it has a small door marked {need}.",
-            f"You are not solving all of {handle}; you are choosing the next honest move.",
-        ],
-        seed,
-        2,
-    )
-    reminder = _pick(
-        [
-            f"{handle.title()} does not get to rent the entire control room.",
-            "A tiny honest step is still a step, even without ceremonial lighting.",
-            "No one has appointed this problem chairperson of the whole afternoon.",
-            "You may answer the situation without becoming its unpaid stage manager.",
-        ],
-        seed,
-        3,
-    )
+    copy = localized_copy(output_language)
+    situation = localized_situation(output_language, topic)
     return (
-        "The Gavel Falls:\n"
-        f"What the council agrees on: {agreement}\n"
-        f"What they disagree on: {_disagreement_line(active_speakers, seed)}\n"
-        f"Hidden pattern: {hidden}\n"
-        f"Tiny next action: {_action_line(topic, theme, need, handle, seed)}\n"
-        f"Ridiculous but useful reminder: {reminder}"
+        f"{copy['verdict_header']}\n"
+        f"{copy['agreement'].format(situation=situation)}\n"
+        f"{copy['disagreement'].format(situation=situation)}\n"
+        f"{copy['hidden'].format(situation=situation)}\n"
+        f"{copy['action'].format(situation=situation)}\n"
+        f"{copy['reminder'].format(situation=situation)}"
     )
