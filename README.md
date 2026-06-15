@@ -1,6 +1,7 @@
 ---
 title: Council of Chuckles
 emoji: "🎭"
+license: mit
 colorFrom: purple
 colorTo: yellow
 sdk: gradio
