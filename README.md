@@ -29,9 +29,9 @@ tags:
   - tiny-aya
 ---
 
-# Council of Chuckles
+# 🤗 🎭 Council of Chuckles
 
-## **🎭 Assemble a tiny council. Bring a messy moment. Receive wisdom with a wink.**
+## **Assemble a tiny council. Bring a messy moment. Receive wisdom with a wink.**
 
 Council of Chuckles is a whimsical Gradio app built for the Hugging Face × Gradio Build Small Hackathon. It lets users summon a custom council from 100 historical and literary-inspired advisors, ask a question about a tricky or annoying situation by typing in their own language or speaking it aloud, and receive a staged response as advisor cards or a short Campfire Council dialogue.
 
