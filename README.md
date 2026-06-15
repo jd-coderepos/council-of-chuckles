@@ -12,240 +12,196 @@ pinned: false
 models:
   - CohereLabs/tiny-aya-water
   - openai/whisper-small
-  - openbmb/VoxCPM2
-  - openbmb/MiniCPM5-1B
 tags:
   - build-small
+  - track:wood
+  - sponsor:openai
+  - achievement:offgrid
+  - achievement:offbrand
+  - achievement:sharing
+  - achievement:fieldnotes
   - thousand-token-wood
   - gradio
   - small-models
-  - tiny-titan
-  - off-brand
-  - best-demo
-  - best-agent
-  - best-use-of-codex
-  - bonus-quest-champion
   - multilingual
-  - voice
-  - codex
-  - cohere
-  - tiny-aya
-  - openbmb
-  - voxcpm
-  - whimsical
-  - local-ai
+  - voice-input
   - zerogpu
-  - council-engine
+  - tiny-aya
 ---
 
 # Council of Chuckles
 
-**Assemble your Mastermind Alliance. Ask a serious question. Receive wisdom with a wink.**
+**🎭 Assemble a tiny council. Bring a messy moment. Receive wisdom with a wink.**
 
-Council of Chuckles is a whimsical Gradio app for the Hugging Face x Gradio Build Small Hackathon. Users select a personal council from `data/advisors.json`, ask a question by text or optional voice input, and receive practical, compassionate advice staged as advisor cards or a short Campfire Council dialogue.
+Council of Chuckles is a whimsical Gradio app built for the Hugging Face × Gradio Build Small Hackathon. It lets users summon a custom council from 100 historical and literary-inspired advisors, ask a question about a tricky or annoying situation by typing in their own language or speaking it aloud, and receive a staged response as advisor cards or a short Campfire Council dialogue.
+
+*The twist:* these great thinkers are not here to give solemn advice. They bring their logic, worldview, and signature wisdom — but must deliver it playfully, like tiny-model philosophers who wandered into a comedy tent.
+
+This submission targets the **Thousand Token Wood** track: playful, AI-native, and powered by small local/open-weight models. Users can type across Tiny Aya’s broad multilingual range via [CohereLabs/tiny-aya-water](https://huggingface.co/CohereLabs/tiny-aya-water), or speak a question through feather-light [openai/whisper-small](https://huggingface.co/openai/whisper-small), making the council multilingual in both text and voice input. Because sometimes our messy moments feel lighter when we can ask — and be answered — in the language closest to us: English, German, Spanish, French, Hindi, Arabic, Tamil, Chinese, Japanese, Swahili, and more.
 
 ## Submission Links
 
-- Live Space: add the final Hugging Face Space URL after deployment
+- Live Space: https://huggingface.co/spaces/build-small-hackathon/council-of-chuckles
 - GitHub repo: https://github.com/jd-coderepos/council-of-chuckles
-- Demo video: add the demo video URL after recording
-- Social post: add the required social-media post URL before final submission
-
-## Why It Fits Thousand Token Wood
-
-The app is a tiny AI council chamber: part multilingual companion, part small-model theater, part practical perspective tool. It targets the Thousand Token Wood track by making AI load-bearing for an original, playful experience that would not make sense as a static form or ordinary chatbot.
-
-## More Than A Prompt Wrapper
-
-Council of Chuckles is not just a prompt wrapper. A lightweight programmed Council Engine runs before generation. It detects the user's themes, emotions, and needs; matches advisors using profile metadata; balances archetypes; plans dialogue turns; and only then asks the small language model to perform the scene. This keeps the app playful, explainable, and reliable even when fallback mode is active.
-
-## Built With Codex
-
-This submission was developed with help from OpenAI Codex. The connected Git history includes Codex-attributed commits for the application, ZeroGPU preparation, and submission preflight tooling.
-
-## The Council Engine
-
-Pipeline:
-
-```text
-User input
--> safety router
--> topic / emotion / need analyzer
--> advisor matching engine
--> archetype balancing
--> active speaker selection
--> dialogue planner
--> prompt builder
--> LLM generation or fallback generation
--> verdict builder
--> optional TTS
-```
-
-The app displays the engine panel before output so users can see detected themes, emotions, needs, active archetypes, triggered advisors, and the speaker strategy.
-
-## Models Used And Parameter Counts
-
-| Component | Model | Parameters | Default? | Purpose |
-| --- | ---: | ---: | --- | --- |
-| Multilingual text generation | `CohereLabs/tiny-aya-water` | 3.35B | Yes | Generates advisor responses in 70+ languages |
-| Speech recognition | `openai/whisper-small` | 244M | Yes, if voice enabled | Transcribes voice input in 15 curated Whisper languages |
-| Speech output | `openbmb/VoxCPM2` | 2B | Optional/off by default | Speaks the final verdict or advisor replies |
-| English fallback | `openbmb/MiniCPM5-1B` | ~1.08B | Optional/off by default | Lightweight English fallback |
-| Template fallback | none | 0B | Always available | Keeps app usable if models fail |
-
-Default multilingual text-only stack: **3.35B**.
-
-Default multilingual voice-input stack: **3.594B**.
-
-Optional full voice-in/voice-out stack: **5.594B**.
-
-All configurations are below the 32B hackathon cap. The ASR model itself stays well below 3B.
-
-## Multilingual Support
-
-Council of Chuckles supports multilingual interaction at two levels. In text mode, the app uses Tiny Aya Water for multilingual text generation across 70+ languages. In voice mode, spoken input is transcribed with the multilingual `openai/whisper-small` model. The app intentionally exposes a curated spoken-language list instead of Whisper's full tokenizer list, because the smallest Whisper models can be uneven across languages and the UI should not overpromise. The transcribed text can then be answered in the same language or in a different selected output language.
-
-Curated Whisper voice input languages in the app: English, German, Hindi, French, Spanish, Italian, Portuguese, Dutch, Polish, Greek, Arabic, Vietnamese, Mandarin Chinese, Japanese, and Korean. Whisper supports additional language tokens; this app keeps the selector smaller to match the reliability target for the demo. Source: [OpenAI Whisper README](https://github.com/openai/whisper).
-
-If the model cannot load, template fallback remains available. Fallback mode is English-only and clearly labels requested non-English outputs.
-
-## Voice Input Support
-
-Voice input is optional and lazy-loaded. The app provides a separate spoken-language selector, transcribes audio into an editable textbox, and waits for the user to click **Use transcript as question** before generation.
-
-If ASR fails, the app remains usable in text mode and displays: "Voice input is currently wandering in the woods. Please type your question instead."
-
-## Optional Voice Output
-
-TTS uses `openbmb/VoxCPM2` and is disabled by default for deployment reliability. The UI includes options to speak the final verdict, advisor cards, or Campfire Council turns. If TTS is unavailable, written output remains the source of truth.
-
-## Council Selection Model
-
-Users can build a large Mastermind Alliance from the advisor dataset. Each session invites only 3 to 7 active speakers, defaulting to 5, so the result stays fast and readable.
-
-Speaker strategies:
-
-- Surprise me
-- Match to my topic
-- Manual selection
-- Balanced Council
-
-Demo-friendly mode caps active speakers at 5 and Campfire turns at 6.
-
-## Session And Continuation Model
-
-The app stores session memory only in Gradio state during the active browser session. Users can export the session as Markdown. No conversations, transcripts, or audio are permanently stored by this app.
-
-## Campfire Council Mode
-
-Campfire Council Mode turns active advisors into a short scripted dialogue. The Council Engine plans the turn order and assigns functions such as validate, reframe, gentle disagreement, comic relief, practical action, synthesize, challenge, and tiny next step.
-
-## Advisor Avatars
-
-Advisor portraits are optional local assets. If an advisor has an `avatar` path in `data/advisors.json`, the app displays it. If not, the app falls back to polished initials and archetype/category styling. This keeps the app professional even before all 100 portraits are curated.
-
-## Features
-
-- Advisor gallery with search, category filter, selection state, and active speaker chips
-- Deterministic Council Engine with transparent analysis
-- Mastermind Mode, Comic Relief Mode, Council Mode, and Campfire Council Mode
-- Safety routing for crisis, harmful humor, and high-stakes professional advice
-- Lazy model loading and always-available fallback generation
-- Optional ASR and TTS
-- Session export as Markdown
-
-## How To Run Locally
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
-```
-
-To avoid downloading models during local UI testing, leave **Use local model when available** unchecked in the app.
-
-## How To Deploy On Hugging Face Spaces / ZeroGPU
-
-Create a Gradio Space, upload the repository, and keep `app.py` as the app file. Models are lazy-loaded, so the Space can render the UI before any generation model is loaded.
-
-ZeroGPU deployment notes:
-
-- Select ZeroGPU hardware in the Space settings.
-- Accept the access terms for the Tiny Aya Water model page from the Hugging Face account that owns the Space.
-- Add an `HF_TOKEN` Space secret if the Space needs authenticated model downloads for gated text models.
-- Keep `ENABLE_TTS=false` for the first stable build, then enable optional voice output only after text and ASR are working.
-
-Useful environment variables:
-
-```bash
-TEXT_MODEL_ID=CohereLabs/tiny-aya-water
-ASR_MODEL_ID=openai/whisper-small
-ENABLE_VOICE_INPUT=true
-TTS_MODEL_ID=openbmb/VoxCPM2
-ENABLE_TTS=false
-ENABLE_ENGLISH_FALLBACK_MODEL=false
-ENGLISH_FALLBACK_MODEL_ID=openbmb/MiniCPM5-1B
-```
-
-## Safety And Humor Policy
-
-The app never claims generated outputs are real quotes. Every persona response is framed as inspired by a public persona or set of ideas.
-
-If the user mentions self-harm, suicidal ideation, abuse, immediate danger, overdose, domestic violence, or crisis, the app stops humor and personas and returns a direct supportive response.
-
-For medical, legal, financial, immigration, tax, investment, or other high-stakes professional topics, the app includes: "This is not professional advice."
-
-If the user asks for cruel, hateful, discriminatory, or demeaning humor, the app refuses the harmful part and offers a safer playful alternative.
+- Demo video: TODO: add final demo URL
+- Social post: TODO: add final social-media post URL
+- Field notes: 
+- Agent traces: 
 
 ## Demo Script
 
-Primary 60-90 second flow:
+A concise demo flow:
 
-1. Open the app.
-2. Choose input mode: Voice.
-3. Choose spoken language: German.
-4. Speak: "Ich habe Angst, mein Paper einzureichen, weil es vielleicht nicht gut genug ist."
-5. Show the editable transcript.
-6. Choose council reply language: German.
-7. Click **Balanced Council**.
-8. Choose **Campfire Council Mode**.
-9. Mood: **Academic panic room**.
-10. Dialogue turns: 6.
-11. Humor intensity: 3.
-12. Compassion: 5.
-13. Generate the council.
-14. Show the Council Engine panel.
-15. Show the Campfire Council dialogue.
-16. Show **The Gavel Falls** verdict.
-17. If TTS is enabled, click **Speak final verdict**.
-18. Ask a follow-up: "Was soll ich in den nachsten zehn Minuten tun?"
-19. Show the short follow-up response.
-20. Show **Export Session as Markdown**.
+1. Open the [Council of Chuckles Space](https://huggingface.co/spaces/build-small-hackathon/council-of-chuckles).
+2. **Panel 1:** Ask a question by typing it, or record a short voice input and transcribe it into the question box.
+3. **Panel 2:** Select council members manually, or use the surprise-pick option. You can pick as many advisors as you like.
+4. **Panel 3:** Choose **Campfire Council Mode**.
+5. **Panel 3:** Keep speaker selection on **Best match to the question** so the app can choose the most relevant voices from the selected council.
+6. **Panel 3:** Use 3–4 active speakers for the best council rhythm; the app can dynamically choose these from the larger council you selected — too many cooks spoil the philosophical soup. 😉
+7. **Panel 3:** Generate the council response.
+8. **Panel 4:** Review the Council Engine stage, active speakers, Campfire dialogue, and final verdict.
+9. Export the session as Markdown.
 
-English text-mode demo:
+Suggested demo questions:
+
+**English**
 
 ```text
 I am afraid to submit my paper because it might not be good enough.
 ```
 
-## Badges / Categories Targeted
+**German**
 
-This app targets the following Build Small track, sponsor prize, and bonus badges. These are categories targeted, not awards claimed.
+```text
+Ich habe Angst, mein Paper einzureichen, weil es vielleicht nicht gut genug ist.
+```
 
-| Target | Why Council of Chuckles fits |
-| --- | --- |
-| Thousand Token Wood | Whimsical, AI-native council theater built around small-model generation, voice input, and playful advisor personas. |
-| Tiny Titan | The default and optional models listed above are each under 4B parameters, with Tiny Aya Water at 3.35B and Whisper small at 244M. |
-| Off Brand | The app uses a custom illustrated hero, themed panels, advisor chips, and a styled Council Stage instead of stock Gradio presentation. |
-| Best Agent | The Council Engine performs multi-step routing, theme/emotion/need analysis, advisor matching, archetype balancing, speaker planning, and verdict synthesis before generation. |
-| Best Demo | The README includes a 60-90 second demo script designed to show voice input, council assembly, model output, safety/fallback behavior, and export. Final eligibility depends on adding the recorded demo and social post links. |
-| Best Use of Codex | The project was developed with OpenAI Codex, and the connected GitHub/Space history includes Codex-authored work. |
-| Bonus Quest Champion | The build intentionally combines several target criteria: tiny models, custom UI, agentic planning, demo readiness, Codex use, ZeroGPU deployment, and a whimsical track fit. |
-| Judges' Wildcard | No special entry is required; the field guide says every submission is automatically in the running. |
+**English**
 
-## Data File Format
+```text
+I added too much flour, my cake is a rock, and I am frustrated.
+```
 
-The app loads advisors from `data/advisors.json`. Required fields are `id`, `name`, and `category`. Optional fields include `era`, `role`, `core_wisdom`, `signature_style`, `mastermind_voice`, `comic_voice`, `catchphrase`, `best_for`, `avoid`, `avatar`, and `avatar_alt`.
+**French**
 
-Legacy `jokester_voice` is supported and normalized to `comic_voice`.
+```text
+J’ai ajouté trop de farine, mon gâteau est dur comme une pierre, et je suis frustrée.
+```
+
+**Swahili**
+
+```text
+Nimeongeza unga mwingi sana, keki yangu imekuwa kama jiwe, na nimechanganyikiwa.
+```
+
+⚠️ Note: The app does **not** claim to generate real quotes. The responses are original lines inspired by public personas, written for perspective, humor, and reflection.
+
+## ℹ️ Main Features
+
+* Custom illustrated [Gradio](https://www.gradio.app/) interface
+* 100 advisor profiles in `data/advisors.json`
+* Searchable advisor selection with category filtering
+* Four response modes: Mastermind, Comic Relief, Council, and Campfire Council
+* Lightweight analysis of topic, emotion, user need, and advisor archetype
+* Advisor matching by best fit, balanced council composition, or random surprise
+* Safety routing for crisis language, harmful humor, and high-stakes advice topics
+* Lazy model loading and fallback generation for deployment reliability
+* Markdown session export
+
+### 🧠 Built-in Council Engine
+
+Council of Chuckles is not just a prompt wrapper around a small language model. Before generation, the app runs a lightweight programmed Council Engine that routes the user’s input through several steps:
+
+```text
+User input
+→ safety router
+→ topic / emotion / need analysis
+→ advisor matching
+→ archetype balancing
+→ active speaker selection
+→ dialogue planning
+→ prompt building
+→ small-model generation or fallback generation
+→ final verdict
+```
+
+The interface exposes this engine panel so users can see the detected themes, needs, selected voices, and speaker strategy before reading the council response.
+
+🛠️ The design explores a simple idea: small models do not always need fine-tuning to produce distinctive behavior. With custom role design, dynamic prompting, message routing, and iterative refinement, a small open-weight model can support a playful multi-perspective interaction while keeping the user experience transparent.
+
+## Models Used
+
+| Component                    | Model                                                                           | Parameters | Used for                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------- | ---------: | -------------------------------------------------------------- |
+| Multilingual text generation | [`CohereLabs/tiny-aya-water`](https://huggingface.co/CohereLabs/tiny-aya-water) |      3.35B | Advisor responses and council dialogue                         |
+| Voice input / ASR            | [`openai/whisper-small`](https://huggingface.co/openai/whisper-small)           |       244M | Optional speech-to-text transcription                          |
+| Template fallback            | none                                                                            |         0B | Keeps the app usable when model loading or ZeroGPU quota fails |
+
+Text interaction uses [Tiny Aya Water](https://huggingface.co/CohereLabs/tiny-aya-water), a 3.35B multilingual small model trained across 70+ languages, with especially strong coverage for European and Asia-Pacific languages. In the app, this lets users type questions and receive council responses in languages such as English, German, French, Spanish, Italian, Portuguese, Polish, Greek, Hindi, Tamil, Vietnamese, Mandarin Chinese, Japanese, Korean, Swahili, Arabic, and more.
+
+Voice input uses [Whisper small](https://huggingface.co/openai/whisper-small) with a curated spoken-language selector in the app: English, German, Hindi, French, Spanish, Italian, Portuguese, Dutch, Polish, Greek, Arabic, Vietnamese, Mandarin Chinese, Japanese, and Korean.
+
+Voice input is optional. The written question remains editable before generation, and the app continues to work in text mode if ASR is unavailable.
+
+## Data
+
+Candidate council member advisor profiles are stored in `data/advisors.json`. This file is the app’s character layer: it does not simply list 100 names, but defines how each advisor should reason, speak, and safely participate in the council.
+
+Each advisor entry includes:
+
+* `id`, `name`, `category`, and `era` to identify and organize the advisor
+* `role` and `core_wisdom` to define the advisor’s intellectual background and central perspective
+* `signature_style`, `mastermind_voice`, and `jokester_voice` to guide tone across serious and playful response modes
+* `catchphrase` to add memorable personality to the generated responses
+* `best_for` to support advisor matching based on the user’s question
+* `avoid` to provide safety and style boundaries for each persona
+
+Together, these fields power advisor search, category filtering, speaker matching, response modes, and the app’s playful-but-grounded council behavior.
+
+## Local Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+The app can be run locally after the model weights are downloaded. No external inference API is required for normal generation.
+
+## Hugging Face Space / ZeroGPU Notes
+
+The app is designed as a Gradio Space and uses lazy model loading so the UI can render before the text model or ASR pipeline is loaded.
+
+Recommended Space settings:
+
+```text
+SDK: Gradio
+Python: 3.10.13
+App file: app.py
+Hardware: ZeroGPU
+```
+
+Useful environment variables:
+
+```text
+TEXT_MODEL_ID=CohereLabs/tiny-aya-water
+ASR_MODEL_ID=openai/whisper-small
+ENABLE_VOICE_INPUT=true
+ENABLE_ENGLISH_FALLBACK_MODEL=false
+```
+
+If model access fails on the Space, add an `HF_TOKEN` secret with read access and make sure the Space owner has accepted any required model access terms.
+
+## 🛡️ Protective Guardrails
+
+Council of Chuckles is designed for light reflection and playful perspective-shifting, not professional decision-making. Its routing and prompt design add caution around medical, legal, financial, immigration, tax, investment, and other high-stakes topics, keeping responses general and reminding users to seek qualified professional advice when needed.
+
+The humor prompts are also bounded: the app is designed to avoid cruel, hateful, discriminatory, demeaning, or identity-based jokes, as well as terms that mock protected traits, personal hardship, trauma, self-harm, disability, religion, ethnicity, gender, sexuality, or nationality. When sensitive or crisis-like language appears, the prompt strategy prioritizes supportive, non-comedic wording over persona performance.
+
+## 🙌 Acknowledgements
+
+This project was built using [**OpenAI Codex**](https://openai.com/codex/) as a coding agent. Vibe coding with Codex supported the implementation of the [Gradio](https://www.gradio.app/) app structure, council orchestration logic, UI refinements, fallback behavior, and submission-readiness checks.
+
+A big thank you to the **Gradio team**, especially **Yuvi**, and to all the [Build Small Hackathon](https://huggingface.co/build-small-hackathon) partners for creating such a generous playground for small-model experimentation. The hackathon resources — from Hugging Face Spaces and ZeroGPU to Codex credits and the field-guide tooling — made it possible to build, test, polish, and ship a playful local/open-weight AI app in the spirit of the jam. 🎭🚀✨
+
