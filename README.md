@@ -62,37 +62,8 @@ A concise demo flow:
 8. **Panel 4:** Review the Council Engine stage, active speakers, Campfire dialogue, and final verdict.
 9. Export the session as Markdown.
 
-Suggested demo questions:
+Check out some example runs in [`demo-example-sessions/`](demo-example-sessions/). The folder contains exported Markdown sessions from multilingual text-mode demos in 🇬🇧 English, 🇨🇳 Mandarin Chinese, 🇫🇷 French, 🇩🇪 German, and 🌍 Arabic. The scenarios include 🎭 procrastination theater, ✅ a to-do list monster, 🕵️ awkward-message detective drama, 📬 inbox opera, and 🔑 a tiny lost-keys apocalypse — each with a different three-advisor council and generated response.
 
-**English**
-
-```text
-I am afraid to submit my paper because it might not be good enough.
-```
-
-**German**
-
-```text
-Ich habe Angst, mein Paper einzureichen, weil es vielleicht nicht gut genug ist.
-```
-
-**English**
-
-```text
-I added too much flour, my cake is a rock, and I am frustrated.
-```
-
-**French**
-
-```text
-J’ai ajouté trop de farine, mon gâteau est dur comme une pierre, et je suis frustrée.
-```
-
-**Swahili**
-
-```text
-Nimeongeza unga mwingi sana, keki yangu imekuwa kama jiwe, na nimechanganyikiwa.
-```
 
 ⚠️ Note: The app does **not** claim to generate real quotes. The responses are original lines inspired by public personas, written for perspective, humor, and reflection.
 
